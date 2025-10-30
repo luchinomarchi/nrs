@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Preview • Nossa Ronda Solidária</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <div class="max-w-3xl mx-auto py-12 px-6">
+    <h1 class="text-3xl font-bold text-gray-900 mb-6">Preview do Sistema</h1>
+    <p class="text-gray-600 mb-8">Navegue pelos mockups principais do projeto.</p>
+    <div class="grid grid-cols-1 gap-4">
+      <a href="/capa.html" class="block bg-white border border-gray-200 rounded-lg p-4 shadow hover:shadow-md">
+        <div class="flex items-center justify-between">
+          <span class="font-semibold">Capa do Projeto</span>
+          <span class="text-teal-600">Abrir →</span>
+        </div>
+      </a>
+      <a href="/mockup-login.html" class="block bg-white border border-gray-200 rounded-lg p-4 shadow hover:shadow-md">
+        <div class="flex items-center justify-between">
+          <span class="font-semibold">Tela de Login/Cadastro</span>
+          <span class="text-teal-600">Abrir →</span>
+        </div>
+      </a>
+      <a href="/mockup-dashboard.html" class="block bg-white border border-gray-200 rounded-lg p-4 shadow hover:shadow-md">
+        <div class="flex items-center justify-between">
+          <span class="font-semibold">Dashboard Administrativo</span>
+          <span class="text-teal-600">Abrir →</span>
+        </div>
+      </a>
+      <a href="/mockup-voluntario.html" class="block bg-white border border-gray-200 rounded-lg p-4 shadow hover:shadow-md">
+        <div class="flex items-center justify-between">
+          <span class="font-semibold">Área do Voluntário</span>
+          <span class="text-teal-600">Abrir →</span>
+        </div>
+      </a>
+      <a href="/mockup-checkin.html" class="block bg-white border border-gray-200 rounded-lg p-4 shadow hover:shadow-md">
+        <div class="flex items-center justify-between">
+          <span class="font-semibold">Sistema de Check-in</span>
+          <span class="text-teal-600">Abrir →</span>
+        </div>
+      </a>
+      <a href="/mockup-eventos.html" class="block bg-white border border-gray-200 rounded-lg p-4 shadow hover:shadow-md">
+        <div class="flex items-center justify-between">
+          <span class="font-semibold">Calendário de Eventos</span>
+          <span class="text-teal-600">Abrir →</span>
+        </div>
+      </a>
+    </div>
+
+    <div class="mt-10">
+      <h2 class="text-xl font-semibold mb-2">Implementação Next.js</h2>
+      <p class="text-gray-600 mb-4">O projeto Next.js está estruturado em <code>src/app</code> e pronto para execução.
+      Para rodar localmente, configure <code>.env</code>, execute <code>npm install</code> e depois <code>npm run dev</code>.</p>
+      <ul class="list-disc pl-6 text-gray-700">
+        <li>Configurações: <code>tsconfig.json</code>, <code>next.config.js</code>, <code>tailwind.config.js</code>, <code>postcss.config.js</code></li>
+        <li>Estilos globais: <code>src/app/globals.css</code></li>
+        <li>Layout raiz: <code>src/app/layout.tsx</code></li>
+        <li>Autenticação mínima: <code>src/app/api/auth/[...nextauth]/route.ts</code></li>
+        <li>Banco de dados: <code>prisma/schema.prisma</code> e <code>.env.example</code></li>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>

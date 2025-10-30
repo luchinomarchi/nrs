@@ -1,0 +1,197 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Modelo de usuário
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          String    @default("voluntario") // admin, voluntario
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relações
+  accounts      Account[]
+  sessions      Session[]
+  voluntario    Voluntario?
+  admin         Admin?
+}
+
+// Modelo para autenticação com NextAuth.js
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Modelo de voluntário
+model Voluntario {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  equipeId      String?
+  nivel         String    @default("Bronze")
+  pontos        Int       @default(0)
+  participacoes Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relações
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  equipe        Equipe?   @relation(fields: [equipeId], references: [id])
+  presencas     Presenca[]
+  conquistas    ConquistaVoluntario[]
+}
+
+// Modelo de administrador
+model Admin {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  cargo     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relações
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventos   Evento[]
+}
+
+// Modelo de equipe
+model Equipe {
+  id          String       @id @default(cuid())
+  nome        String
+  descricao   String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Relações
+  voluntarios Voluntario[]
+  eventos     EventoEquipe[]
+}
+
+// Modelo de evento
+model Evento {
+  id          String       @id @default(cuid())
+  nome        String
+  descricao   String?
+  data        DateTime
+  horarioInicio DateTime
+  horarioFim  DateTime
+  local       String
+  endereco    String?
+  vagasTotal  Int
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  adminId     String
+
+  // Relações
+  admin       Admin        @relation(fields: [adminId], references: [id])
+  equipes     EventoEquipe[]
+  presencas   Presenca[]
+}
+
+// Tabela de junção entre Evento e Equipe
+model EventoEquipe {
+  id        String   @id @default(cuid())
+  eventoId  String
+  equipeId  String
+  vagasEquipe Int
+  createdAt DateTime @default(now())
+
+  // Relações
+  evento    Evento   @relation(fields: [eventoId], references: [id], onDelete: Cascade)
+  equipe    Equipe   @relation(fields: [equipeId], references: [id], onDelete: Cascade)
+
+  @@unique([eventoId, equipeId])
+}
+
+// Modelo de presença (check-in)
+model Presenca {
+  id          String   @id @default(cuid())
+  voluntarioId String
+  eventoId    String
+  status      String   @default("presente") // presente, ausente, justificado
+  pontos      Int      @default(0)
+  dataCheckin DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relações
+  voluntario  Voluntario @relation(fields: [voluntarioId], references: [id], onDelete: Cascade)
+  evento      Evento     @relation(fields: [eventoId], references: [id], onDelete: Cascade)
+
+  @@unique([voluntarioId, eventoId])
+}
+
+// Modelo de conquista
+model Conquista {
+  id          String    @id @default(cuid())
+  nome        String
+  descricao   String?
+  categoria   String
+  icone       String
+  pontos      Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relações
+  voluntarios ConquistaVoluntario[]
+}
+
+// Tabela de junção entre Voluntário e Conquista
+model ConquistaVoluntario {
+  id           String   @id @default(cuid())
+  voluntarioId String
+  conquistaId  String
+  progresso    Int      @default(0)
+  desbloqueada Boolean  @default(false)
+  dataConquista DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relações
+  voluntario   Voluntario @relation(fields: [voluntarioId], references: [id], onDelete: Cascade)
+  conquista    Conquista  @relation(fields: [conquistaId], references: [id], onDelete: Cascade)
+
+  @@unique([voluntarioId, conquistaId])
+}

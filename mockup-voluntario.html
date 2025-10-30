@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nossa Ronda Solidária - Área do Voluntário</title>
+    <style>
+        :root {
+            --primary: #0F766E; /* teal-700 */
+            --primary-light: #0D9488; /* teal-600 */
+            --secondary: #F59E0B; /* amber-500 */
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+            --gray: #95a5a6;
+            --success: #27ae60;
+            --danger: #c0392b;
+            --warning: #f39c12;
+            --info: #3498db;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f6fa;
+            color: var(--dark);
+        }
+        
+        .dashboard {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: var(--dark);
+            color: white;
+            padding: 20px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+        }
+        
+        .sidebar-header img {
+            height: 32px;
+            width: auto;
+            margin-right: 10px;
+            border-radius: 0;
+            background-color: transparent;
+            padding: 0;
+        }
+        
+        .sidebar-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+        
+        .menu-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .menu-item.active {
+            background-color: var(--primary);
+            color: white;
+            border-left: 4px solid var(--secondary);
+        }
+        
+        .menu-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .menu-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .page-title h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .user-name {
+            font-weight: 500;
+        }
+        
+        /* Profile Section */
+        .profile-section {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+            display: flex;
+            gap: 30px;
+        }
+        
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background-color: #f5f6fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: var(--gray);
+        }
+        
+        .profile-info {
+            flex: 1;
+        }
+        
+        .profile-name {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .profile-team {
+            font-size: 16px;
+            color: var(--gray);
+            margin-bottom: 15px;
+        }
+        
+        .profile-stats {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: var(--gray);
+        }
+        
+        /* Achievements Section */
+        .achievements-section {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .badges-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+        }
+        
+        .badge-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .badge-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #f5f6fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .badge-icon.earned {
+            background-color: var(--primary-light);
+            color: white;
+        }
+        
+        .badge-icon.locked {
+            background-color: var(--gray);
+            color: white;
+            opacity: 0.5;
+        }
+        
+        .badge-name {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .badge-description {
+            font-size: 12px;
+            color: var(--gray);
+            margin-top: 5px;
+        }
+        
+        /* Events Section */
+        .events-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .upcoming-events {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .event-list {
+            margin-top: 20px;
+        }
+        
+        .event-item {
+            display: flex;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .event-date {
+            width: 60px;
+            height: 60px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+        
+        .event-day {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .event-month {
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        
+        .event-details {
+            flex: 1;
+        }
+        
+        .event-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .event-location {
+            font-size: 14px;
+            color: var(--gray);
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .event-time {
+            font-size: 14px;
+            color: var(--gray);
+            display: flex;
+            align-items: center;
+        }
+        
+        .event-actions {
+            display: flex;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 8px 15px;
+            border-radius: 5px;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid #ddd;
+            color: var(--dark);
+        }
+        
+        .attendance-history {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .history-list {
+            margin-top: 20px;
+        }
+        
+        .history-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .history-status {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+        
+        .status-present {
+            background-color: rgba(39, 174, 96, 0.1);
+            color: var(--success);
+        }
+        
+        .status-absent {
+            background-color: rgba(192, 57, 43, 0.1);
+            color: var(--danger);
+        }
+        
+        .history-details {
+            flex: 1;
+        }
+        
+        .history-title {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .history-date {
+            font-size: 12px;
+            color: var(--gray);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <img src="/assets/logo-nrs.svg" alt="Nossa Ronda Solidária">
+                <h3>Nossa Ronda</h3>
+            </div>
+            
+            <div class="sidebar-menu">
+                <a href="#" class="menu-item">
+                    <i>📊</i>
+                    <span>Meu Painel</span>
+                </a>
+                <a href="#" class="menu-item active">
+                    <i>👤</i>
+                    <span>Meu Perfil</span>
+                </a>
+                <a href="#" class="menu-item">
+                    <i>📅</i>
+                    <span>Eventos</span>
+                </a>
+                <a href="#" class="menu-item">
+                    <i>🏆</i>
+                    <span>Conquistas</span>
+                </a>
+                <a href="#" class="menu-item">
+                    <i>👥</i>
+                    <span>Minha Equipe</span>
+                </a>
+                <a href="#" class="menu-item">
+                    <i>📨</i>
+                    <span>Mensagens</span>
+                </a>
+                <a href="#" class="menu-item">
+                    <i>⚙️</i>
+                    <span>Configurações</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <div class="page-title">
+                    <h1>Meu Perfil</h1>
+                </div>
+                
+                <div class="user-info">
+                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMjAwIj48Y2lyY2xlIGN4PSIxMDAiIGN5PSI3MCIgcj0iNDAiIGZpbGw9IiM5NWE1YTYiLz48cGF0aCBkPSJNMTgwLDE4MEgzMHYtMjBjMC0zMCw1MC01MCw3MC01MGMyMCwwLDcwLDIwLDcwLDUwdjIweiIgZmlsbD0iIzk1YTVhNiIvPjwvc3ZnPg==" alt="User">
+                    <span class="user-name">Maria Silva</span>
+                </div>
+            </div>
+            
+            <!-- Profile Section -->
+            <div class="profile-section">
+                <div class="profile-avatar">👤</div>
+                <div class="profile-info">
+                    <h2 class="profile-name">Maria Silva</h2>
+                    <div class="profile-team">Equipe: Logística</div>
+                    
+                    <div class="profile-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">24</div>
+                            <div class="stat-label">Participações</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">480</div>
+                            <div class="stat-label">Pontos</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">5</div>
+                            <div class="stat-label">Conquistas</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">8</div>
+                            <div class="stat-label">Meses Ativos</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Achievements Section -->
+            <div class="achievements-section">
+                <div class="section-header">
+                    <div class="section-title">Minhas Conquistas</div>
+                    <button class="btn btn-outline">Ver Todas</button>
+                </div>
+                
+                <div class="badges-container">
+                    <div class="badge-item">
+                        <div class="badge-icon earned">🌟</div>
+                        <div class="badge-name">Primeiro Passo</div>
+                        <div class="badge-description">Participou da primeira ação</div>
+                    </div>
+                    <div class="badge-item">
+                        <div class="badge-icon earned">🔥</div>
+                        <div class="badge-name">Dedicação</div>
+                        <div class="badge-description">5 ações consecutivas</div>
+                    </div>
+                    <div class="badge-item">
+                        <div class="badge-icon earned">🏆</div>
+                        <div class="badge-name">Superação</div>
+                        <div class="badge-description">10 ações realizadas</div>
+                    </div>
+                    <div class="badge-item">
+                        <div class="badge-icon earned">👑</div>
+                        <div class="badge-name">Líder</div>
+                        <div class="badge-description">Coordenou uma equipe</div>
+                    </div>
+                    <div class="badge-item">
+                        <div class="badge-icon earned">❤️</div>
+                        <div class="badge-name">Solidariedade</div>
+                        <div class="badge-description">20 ações realizadas</div>
+                    </div>
+                    <div class="badge-item">
+                        <div class="badge-icon locked">🌈</div>
+                        <div class="badge-name">Diversidade</div>
+                        <div class="badge-description">Participou de 5 tipos diferentes de ações</div>
+                    </div>
+                    <div class="badge-item">
+                        <div class="badge-icon locked">🌱</div>
+                        <div class="badge-name">Sustentabilidade</div>
+                        <div class="badge-description">Participou de 3 ações ambientais</div>
+                    </div>
+                    <div class="badge-item">
+                        <div class="badge-icon locked">🌍</div>
+                        <div class="badge-name">Global</div>
+                        <div class="badge-description">1 ano de voluntariado</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Events Section -->
+            <div class="events-section">
+                <div class="upcoming-events">
+                    <div class="section-header">
+                        <div class="section-title">Próximos Eventos</div>
+                        <button class="btn btn-outline">Ver Todos</button>
+                    </div>
+                    
+                    <div class="event-list">
+                        <div class="event-item">
+                            <div class="event-date">
+                                <div class="event-day">15</div>
+                                <div class="event-month">JUN</div>
+                            </div>
+                            <div class="event-details">
+                                <div class="event-title">Distribuição de Alimentos - Centro</div>
+                                <div class="event-location">📍 Praça da Sé, Centro</div>
+                                <div class="event-time">🕒 19:00 - 22:00</div>
+                            </div>
+                            <div class="event-actions">
+                                <button class="btn btn-primary">Confirmar</button>
+                            </div>
+                        </div>
+                        
+                        <div class="event-item">
+                            <div class="event-date">
+                                <div class="event-day">22</div>
+                                <div class="event-month">JUN</div>
+                            </div>
+                            <div class="event-details">
+                                <div class="event-title">Distribuição de Cobertores</div>
+                                <div class="event-location">📍 Av. Paulista, 1000</div>
+                                <div class="event-time">🕒 20:00 - 23:00</div>
+                            </div>
+                            <div class="event-actions">
+                                <button class="btn btn-primary">Confirmar</button>
+                            </div>
+                        </div>
+                        
+                        <div class="event-item">
+                            <div class="event-date">
+                                <div class="event-day">29</div>
+                                <div class="event-month">JUN</div>
+                            </div>
+                            <div class="event-details">
+                                <div class="event-title">Ação Especial - Sopão Solidário</div>
+                                <div class="event-location">📍 Largo da Batata, Pinheiros</div>
+                                <div class="event-time">🕒 18:00 - 21:00</div>
+                            </div>
+                            <div class="event-actions">
+                                <button class="btn btn-primary">Confirmar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="attendance-history">
+                    <div class="section-header">
+                        <div class="section-title">Histórico de Presença</div>
+                    </div>
+                    
+                    <div class="history-list">
+                        <div class="history-item">
+                            <div class="history-status status-present">✓</div>
+                            <div class="history-details">
+                                <div class="history-title">Distribuição de Alimentos</div>
+                                <div class="history-date">08 de Junho, 2023</div>
+                            </div>
+                        </div>
+                        
+                        <div class="history-item">
+                            <div class="history-status status-present">✓</div>
+                            <div class="history-details">
+                                <div class="history-title">Ação Especial - Dia das Mães</div>
+                                <div class="history-date">01 de Junho, 2023</div>
+                            </div>
+                        </div>
+                        
+                        <div class="history-item">
+                            <div class="history-status status-absent">✗</div>
+                            <div class="history-details">
+                                <div class="history-title">Distribuição de Cobertores</div>
+                                <div class="history-date">25 de Maio, 2023</div>
+                            </div>
+                        </div>
+                        
+                        <div class="history-item">
+                            <div class="history-status status-present">✓</div>
+                            <div class="history-details">
+                                <div class="history-title">Distribuição de Alimentos</div>
+                                <div class="history-date">18 de Maio, 2023</div>
+                            </div>
+                        </div>
+                        
+                        <div class="history-item">
+                            <div class="history-status status-present">✓</div>
+                            <div class="history-details">
+                                <div class="history-title">Distribuição de Alimentos</div>
+                                <div class="history-date">11 de Maio, 2023</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
