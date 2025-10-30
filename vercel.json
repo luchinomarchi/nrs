@@ -1,0 +1,10 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "installCommand": "npm install",
+  "devCommand": "npm run dev",
+  "env": {
+    "NEXTAUTH_URL": "https://nrs-k653m3hgz-luchino-marchis-projects.vercel.app"
+  }
+}
