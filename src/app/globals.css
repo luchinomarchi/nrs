@@ -12,3 +12,38 @@ body {
     "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji",
     "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
+
+/* Estilos personalizados baseados na logomarca */
+@layer components {
+  .btn-primary {
+    @apply bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+  
+  .btn-secondary {
+    @apply bg-secondary-500 hover:bg-secondary-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+  
+  .btn-accent {
+    @apply bg-accent-500 hover:bg-accent-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+  
+  .card-primary {
+    @apply bg-white border border-primary-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200;
+  }
+  
+  .header-gradient {
+    @apply bg-gradient-to-r from-primary-600 to-primary-700;
+  }
+  
+  .text-brand {
+    @apply text-primary-700;
+  }
+  
+  .border-brand {
+    @apply border-primary-300;
+  }
+  
+  .bg-brand-light {
+    @apply bg-primary-50;
+  }
+}

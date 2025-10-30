@@ -1,20 +1,33 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 80" role="img" aria-label="Nossa Ronda Solidária Logo">
+<svg width="400" height="100" viewBox="0 0 400 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Círculo principal com gradiente -->
   <defs>
-    <style>
-      .text { font-family: Inter, Segoe UI, Arial, sans-serif; }
-    </style>
+    <radialGradient id="mainGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:1" />
+      <stop offset="30%" style="stop-color:#f7931e;stop-opacity:1" />
+      <stop offset="60%" style="stop-color:#8b5a8c;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#5a7c8a;stop-opacity:1" />
+    </radialGradient>
+    
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#2d3748;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a202c;stop-opacity:1" />
+    </linearGradient>
   </defs>
-  <!-- Ícone circular com segmentos coloridos (simplificação da marca) -->
-  <g transform="translate(12,12)">
-    <circle cx="30" cy="28" r="28" fill="#F3F4F6" />
-    <path d="M30 0 A28 28 0 0 1 58 28 L30 28 Z" fill="#0F766E" />
-    <path d="M30 28 L58 28 A28 28 0 0 1 30 56 Z" fill="#E11D48" />
-    <path d="M30 28 L30 56 A28 28 0 0 1 2 28 Z" fill="#F59E0B" />
-    <path d="M30 28 L2 28 A28 28 0 0 1 30 0 Z" fill="#7C3AED" />
-  </g>
-  <!-- Logotipo textual -->
-  <text class="text" x="90" y="34" font-size="26" font-weight="600" fill="#111827">nossa</text>
-  <text class="text" x="150" y="34" font-size="26" font-weight="800" fill="#111827">ronda</text>
-  <text class="text" x="90" y="56" font-size="14" font-weight="500" fill="#374151">SOLIDÁRIA</text>
+  
+  <!-- Círculo principal -->
+  <circle cx="50" cy="50" r="45" fill="url(#mainGradient)" opacity="0.9"/>
+  
+  <!-- Formas orgânicas internas -->
+  <path d="M20,35 Q35,25 45,40 Q55,55 35,65 Q25,50 20,35 Z" fill="#ffffff" opacity="0.8"/>
+  <path d="M55,25 Q70,30 75,45 Q70,60 55,55 Q50,40 55,25 Z" fill="#8b5a8c" opacity="0.7"/>
+  <path d="M30,60 Q45,70 60,65 Q65,50 50,45 Q35,55 30,60 Z" fill="#f7931e" opacity="0.6"/>
+  
+  <!-- Ponto central -->
+  <circle cx="50" cy="20" r="6" fill="#8b5a8c"/>
+  
+  <!-- Texto "nossaronda" -->
+  <text x="110" y="45" font-family="Arial, sans-serif" font-size="32" font-weight="300" fill="url(#textGradient)">nossaronda</text>
+  
+  <!-- Texto "SOLIDÁRIA" -->
+  <text x="110" y="75" font-family="Arial, sans-serif" font-size="18" font-weight="400" fill="#666666" letter-spacing="2px">SOLIDÁRIA</text>
 </svg>

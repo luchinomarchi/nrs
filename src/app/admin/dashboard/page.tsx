@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 // Dados simulados para o dashboard
 const mockData = {
@@ -27,20 +28,23 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-gray-100">
       <div className="flex">
         {/* Sidebar */}
-        <div className="w-64 bg-gray-800 text-white min-h-screen fixed">
-          <div className="p-4 border-b border-gray-700">
+        <div className="w-64 header-gradient text-white min-h-screen fixed">
+          <div className="p-4 border-b border-primary-500">
             <div className="flex items-center">
-              <div className="w-10 h-10 rounded-full bg-teal-700 flex items-center justify-center text-white mr-3">
-                NR
-              </div>
-              <h1 className="text-xl font-semibold">Nossa Ronda</h1>
+              <Image 
+                src="/logo-nrs.png" 
+                alt="Nossa Ronda Solidária" 
+                width={160} 
+                height={40}
+                className="h-8 w-auto filter brightness-0 invert"
+              />
             </div>
           </div>
           
           <nav className="mt-4">
             <a 
               href="#" 
-              className={`flex items-center px-4 py-3 ${activeMenuItem === 'dashboard' ? 'bg-teal-700' : 'hover:bg-gray-700'}`}
+              className={`flex items-center px-4 py-3 ${activeMenuItem === 'dashboard' ? 'bg-primary-600' : 'hover:bg-primary-500/20'}`}
               onClick={() => setActiveMenuItem('dashboard')}
             >
               <span className="mr-3">📊</span>
@@ -48,7 +52,7 @@ export default function AdminDashboard() {
             </a>
             <a 
               href="#" 
-              className={`flex items-center px-4 py-3 ${activeMenuItem === 'voluntarios' ? 'bg-teal-700' : 'hover:bg-gray-700'}`}
+              className={`flex items-center px-4 py-3 ${activeMenuItem === 'voluntarios' ? 'bg-primary-600' : 'hover:bg-primary-500/20'}`}
               onClick={() => setActiveMenuItem('voluntarios')}
             >
               <span className="mr-3">👥</span>
@@ -56,7 +60,7 @@ export default function AdminDashboard() {
             </a>
             <a 
               href="#" 
-              className={`flex items-center px-4 py-3 ${activeMenuItem === 'eventos' ? 'bg-teal-700' : 'hover:bg-gray-700'}`}
+              className={`flex items-center px-4 py-3 ${activeMenuItem === 'eventos' ? 'bg-primary-600' : 'hover:bg-primary-500/20'}`}
               onClick={() => setActiveMenuItem('eventos')}
             >
               <span className="mr-3">📅</span>
@@ -64,7 +68,7 @@ export default function AdminDashboard() {
             </a>
             <a 
               href="#" 
-              className={`flex items-center px-4 py-3 ${activeMenuItem === 'checkins' ? 'bg-teal-700' : 'hover:bg-gray-700'}`}
+              className={`flex items-center px-4 py-3 ${activeMenuItem === 'checkins' ? 'bg-primary-600' : 'hover:bg-primary-500/20'}`}
               onClick={() => setActiveMenuItem('checkins')}
             >
               <span className="mr-3">✓</span>
@@ -72,7 +76,7 @@ export default function AdminDashboard() {
             </a>
             <a 
               href="#" 
-              className={`flex items-center px-4 py-3 ${activeMenuItem === 'conquistas' ? 'bg-teal-700' : 'hover:bg-gray-700'}`}
+              className={`flex items-center px-4 py-3 ${activeMenuItem === 'conquistas' ? 'bg-primary-600' : 'hover:bg-primary-500/20'}`}
               onClick={() => setActiveMenuItem('conquistas')}
             >
               <span className="mr-3">🏆</span>
@@ -80,7 +84,7 @@ export default function AdminDashboard() {
             </a>
             <a 
               href="#" 
-              className={`flex items-center px-4 py-3 ${activeMenuItem === 'equipes' ? 'bg-teal-700' : 'hover:bg-gray-700'}`}
+              className={`flex items-center px-4 py-3 ${activeMenuItem === 'equipes' ? 'bg-primary-600' : 'hover:bg-primary-500/20'}`}
               onClick={() => setActiveMenuItem('equipes')}
             >
               <span className="mr-3">👥</span>
@@ -88,7 +92,7 @@ export default function AdminDashboard() {
             </a>
             <a 
               href="#" 
-              className={`flex items-center px-4 py-3 ${activeMenuItem === 'comunicacoes' ? 'bg-teal-700' : 'hover:bg-gray-700'}`}
+              className={`flex items-center px-4 py-3 ${activeMenuItem === 'comunicacoes' ? 'bg-primary-600' : 'hover:bg-primary-500/20'}`}
               onClick={() => setActiveMenuItem('comunicacoes')}
             >
               <span className="mr-3">📨</span>
@@ -96,7 +100,7 @@ export default function AdminDashboard() {
             </a>
             <a 
               href="#" 
-              className={`flex items-center px-4 py-3 ${activeMenuItem === 'configuracoes' ? 'bg-teal-700' : 'hover:bg-gray-700'}`}
+              className={`flex items-center px-4 py-3 ${activeMenuItem === 'configuracoes' ? 'bg-primary-600' : 'hover:bg-primary-500/20'}`}
               onClick={() => setActiveMenuItem('configuracoes')}
             >
               <span className="mr-3">⚙️</span>
@@ -115,7 +119,7 @@ export default function AdminDashboard() {
                 <input 
                   type="text" 
                   placeholder="Buscar..." 
-                  className="px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  className="px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
               
@@ -128,46 +132,46 @@ export default function AdminDashboard() {
           
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="card-primary rounded-lg shadow p-6">
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h3 className="text-gray-500 text-sm">Voluntários Ativos</h3>
                   <p className="text-2xl font-semibold">{mockData.stats.voluntariosAtivos}</p>
                 </div>
-                <div className="p-2 rounded-full bg-teal-100 text-teal-700">👥</div>
+                <div className="p-2 rounded-full bg-primary-100 text-primary-700">👥</div>
               </div>
               <p className="text-green-500 text-sm">+12% desde o mês passado</p>
             </div>
             
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="card-primary rounded-lg shadow p-6">
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h3 className="text-gray-500 text-sm">Próximos Eventos</h3>
                   <p className="text-2xl font-semibold">{mockData.stats.proximosEventos}</p>
                 </div>
-                <div className="p-2 rounded-full bg-blue-100 text-blue-600">📅</div>
+                <div className="p-2 rounded-full bg-secondary-100 text-secondary-700">📅</div>
               </div>
               <p className="text-green-500 text-sm">+2 novos eventos</p>
             </div>
             
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="card-primary rounded-lg shadow p-6">
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h3 className="text-gray-500 text-sm">Check-ins Realizados</h3>
                   <p className="text-2xl font-semibold">{mockData.stats.checkinsRealizados}</p>
                 </div>
-                <div className="p-2 rounded-full bg-green-100 text-green-600">✓</div>
+                <div className="p-2 rounded-full bg-accent-100 text-accent-700">✓</div>
               </div>
               <p className="text-green-500 text-sm">+23% desde o último evento</p>
             </div>
             
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="card-primary rounded-lg shadow p-6">
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h3 className="text-gray-500 text-sm">Equipes Ativas</h3>
                   <p className="text-2xl font-semibold">{mockData.stats.equipesAtivas}</p>
                 </div>
-                <div className="p-2 rounded-full bg-yellow-100 text-yellow-600">👥</div>
+                <div className="p-2 rounded-full bg-purple-100 text-purple-700">👥</div>
               </div>
               <p className="text-green-500 text-sm">+1 nova equipe</p>
             </div>
@@ -175,7 +179,7 @@ export default function AdminDashboard() {
           
           {/* Charts Section */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <div className="bg-white rounded-lg shadow p-6 lg:col-span-2">
+            <div className="card-primary rounded-lg shadow p-6 lg:col-span-2">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="font-semibold">Engajamento de Voluntários</h3>
                 <select className="border rounded px-2 py-1 text-sm">
@@ -189,7 +193,7 @@ export default function AdminDashboard() {
               </div>
             </div>
             
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="card-primary rounded-lg shadow p-6">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="font-semibold">Distribuição por Equipe</h3>
                 <select className="border rounded px-2 py-1 text-sm">
@@ -205,14 +209,14 @@ export default function AdminDashboard() {
           </div>
           
           {/* Volunteers Table */}
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="card-primary rounded-lg shadow overflow-hidden">
             <div className="p-6 border-b flex justify-between items-center">
               <h3 className="font-semibold">Voluntários por Frequência</h3>
               <div className="flex space-x-2">
                 <button className="px-4 py-2 border rounded text-sm hover:bg-gray-50">
                   Exportar
                 </button>
-                <button className="px-4 py-2 bg-teal-700 text-white rounded text-sm hover:bg-teal-800">
+                <button className="btn-primary text-sm">
                   + Adicionar
                 </button>
               </div>
@@ -263,8 +267,8 @@ export default function AdminDashboard() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 py-1 text-xs rounded-full ${
                           voluntario.status === 'Ativo' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-yellow-100 text-yellow-800'
+                            ? 'bg-secondary-100 text-secondary-800' 
+                            : 'bg-accent-100 text-accent-800'
                         }`}>
                           {voluntario.status}
                         </span>
@@ -280,7 +284,7 @@ export default function AdminDashboard() {
                 Mostrando 1-5 de 128 voluntários
               </div>
               <div className="flex space-x-1">
-                <button className="w-8 h-8 flex items-center justify-center rounded bg-teal-700 text-white">
+                <button className="w-8 h-8 flex items-center justify-center rounded bg-primary-700 text-white">
                   1
                 </button>
                 <button className="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100">

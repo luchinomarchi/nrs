@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 // Dados simulados para o dashboard do voluntário
 const mockData = {
@@ -43,20 +44,23 @@ export default function VoluntarioDashboard() {
     <div className="min-h-screen bg-gray-100">
       <div className="flex">
         {/* Sidebar */}
-        <div className="w-64 bg-gray-800 text-white min-h-screen fixed">
-          <div className="p-4 border-b border-gray-700">
+        <div className="w-64 header-gradient text-white min-h-screen fixed">
+          <div className="p-4 border-b border-primary-500">
             <div className="flex items-center">
-              <div className="w-10 h-10 rounded-full bg-teal-700 flex items-center justify-center text-white mr-3">
-                NR
-              </div>
-              <h1 className="text-xl font-semibold">Nossa Ronda</h1>
+              <Image 
+                src="/logo-nrs.png" 
+                alt="Nossa Ronda Solidária" 
+                width={160} 
+                height={40}
+                className="h-8 w-auto filter brightness-0 invert"
+              />
             </div>
           </div>
           
           <nav className="mt-4">
             <a 
               href="#" 
-              className={`flex items-center px-4 py-3 ${activeMenuItem === 'dashboard' ? 'bg-teal-700' : 'hover:bg-gray-700'}`}
+              className={`flex items-center px-4 py-3 ${activeMenuItem === 'dashboard' ? 'bg-primary-600' : 'hover:bg-primary-500/20'}`}
               onClick={() => setActiveMenuItem('dashboard')}
             >
               <span className="mr-3">📊</span>
@@ -64,7 +68,7 @@ export default function VoluntarioDashboard() {
             </a>
             <a 
               href="#" 
-              className={`flex items-center px-4 py-3 ${activeMenuItem === 'eventos' ? 'bg-teal-700' : 'hover:bg-gray-700'}`}
+              className={`flex items-center px-4 py-3 ${activeMenuItem === 'eventos' ? 'bg-primary-600' : 'hover:bg-primary-500/20'}`}
               onClick={() => setActiveMenuItem('eventos')}
             >
               <span className="mr-3">📅</span>
@@ -72,7 +76,7 @@ export default function VoluntarioDashboard() {
             </a>
             <a 
               href="#" 
-              className={`flex items-center px-4 py-3 ${activeMenuItem === 'checkins' ? 'bg-teal-700' : 'hover:bg-gray-700'}`}
+              className={`flex items-center px-4 py-3 ${activeMenuItem === 'checkins' ? 'bg-primary-600' : 'hover:bg-primary-500/20'}`}
               onClick={() => setActiveMenuItem('checkins')}
             >
               <span className="mr-3">✓</span>
@@ -80,7 +84,7 @@ export default function VoluntarioDashboard() {
             </a>
             <a 
               href="#" 
-              className={`flex items-center px-4 py-3 ${activeMenuItem === 'conquistas' ? 'bg-teal-700' : 'hover:bg-gray-700'}`}
+              className={`flex items-center px-4 py-3 ${activeMenuItem === 'conquistas' ? 'bg-primary-600' : 'hover:bg-primary-500/20'}`}
               onClick={() => setActiveMenuItem('conquistas')}
             >
               <span className="mr-3">🏆</span>
@@ -88,7 +92,7 @@ export default function VoluntarioDashboard() {
             </a>
             <a 
               href="#" 
-              className={`flex items-center px-4 py-3 ${activeMenuItem === 'equipe' ? 'bg-teal-700' : 'hover:bg-gray-700'}`}
+              className={`flex items-center px-4 py-3 ${activeMenuItem === 'equipe' ? 'bg-primary-600' : 'hover:bg-primary-500/20'}`}
               onClick={() => setActiveMenuItem('equipe')}
             >
               <span className="mr-3">👥</span>

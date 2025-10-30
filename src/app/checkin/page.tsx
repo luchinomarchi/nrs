@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function CheckinPage() {
   const [scanActive, setScanActive] = useState(false);
@@ -64,9 +65,13 @@ export default function CheckinPage() {
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <Link href="/" className="flex items-center">
-            <div className="w-10 h-10 rounded-full bg-teal-700 flex items-center justify-center text-white mr-3">
-              NR
-            </div>
+            <Image 
+              src="/logo-nrs.png" 
+              alt="Nossa Ronda Solidária" 
+              width={200} 
+              height={50}
+              className="h-10 w-auto mr-3"
+            />
             <span className="text-xl font-semibold">Nossa Ronda Solidária</span>
           </Link>
           

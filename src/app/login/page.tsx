@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -41,25 +42,28 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-teal-100 to-white flex flex-col md:flex-row">
+    <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white flex flex-col md:flex-row">
       {/* Left Panel - Information */}
-      <div className="md:w-1/2 bg-teal-700 text-white p-8 md:p-12 flex flex-col justify-between">
+      <div className="md:w-1/2 header-gradient text-white p-8 md:p-12 flex flex-col justify-between">
         <div>
           <div className="flex items-center mb-8">
-            <div className="w-12 h-12 mr-3 rounded-full bg-white flex items-center justify-center text-teal-700 font-bold">
-              NR
-            </div>
-            <h1 className="text-2xl font-bold">Nossa Ronda Solidária</h1>
+            <Image 
+              src="/logo-nrs.png" 
+              alt="Nossa Ronda Solidária" 
+              width={200} 
+              height={50}
+              className="h-12 w-auto filter brightness-0 invert"
+            />
           </div>
           
           <h2 className="text-3xl md:text-4xl font-bold mb-6">Transforme vidas através do voluntariado</h2>
-          <p className="text-teal-200 mb-8">
+          <p className="text-primary-200 mb-8">
             Junte-se a centenas de voluntários que estão fazendo a diferença na vida de pessoas em situação de vulnerabilidade.
           </p>
         </div>
         
         <div className="mt-auto">
-          <div className="border-t border-teal-600 pt-6 mt-6">
+          <div className="border-t border-primary-500 pt-6 mt-6">
             <h3 className="font-semibold mb-4">O que nossos voluntários dizem:</h3>
             <div className="mb-4">
               <p className="italic mb-2">
@@ -96,7 +100,7 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                 placeholder="seu@email.com"
               />
             </div>
@@ -106,7 +110,7 @@ export default function Login() {
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                   Senha
                 </label>
-                <Link href="/forgot-password" className="text-sm text-teal-700 hover:text-teal-800">
+                <Link href="/forgot-password" className="text-sm text-primary-700 hover:text-primary-800">
                   Esqueceu a senha?
                 </Link>
               </div>
@@ -116,7 +120,7 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                 placeholder="••••••••"
               />
             </div>
@@ -125,7 +129,7 @@ export default function Login() {
               <input
                 id="remember-me"
                 type="checkbox"
-                className="h-4 w-4 text-teal-700 focus:ring-teal-500 border-gray-300 rounded"
+                className="h-4 w-4 text-primary-700 focus:ring-primary-500 border-gray-300 rounded"
               />
               <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
                 Lembrar de mim
@@ -135,7 +139,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 bg-teal-700 hover:bg-teal-800 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition disabled:opacity-50"
+              className="w-full btn-primary"
             >
               {loading ? 'Entrando...' : 'Entrar'}
             </button>
@@ -154,13 +158,13 @@ export default function Login() {
             <div className="mt-6 grid grid-cols-2 gap-3">
               <button
                 type="button"
-                className="w-full py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
+                className="w-full py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
               >
                 Google
               </button>
               <button
                 type="button"
-                className="w-full py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"
+                className="w-full py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
               >
                 Facebook
               </button>
@@ -169,7 +173,7 @@ export default function Login() {
           
           <p className="mt-8 text-center text-sm text-gray-600">
             Não tem uma conta?{' '}
-            <Link href="/register" className="font-medium text-teal-700 hover:text-teal-600">
+            <Link href="/register" className="font-medium text-primary-700 hover:text-primary-600">
               Cadastre-se
             </Link>
           </p>
