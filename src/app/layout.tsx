@@ -1,3 +1,5 @@
+import './globals.css'
+
 export const metadata = {
   title: "Nossa Ronda Solidária",
   description: "Sistema de apoio a ações solidárias e voluntariado",
