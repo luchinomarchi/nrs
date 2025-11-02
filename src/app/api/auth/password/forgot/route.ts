@@ -3,6 +3,35 @@ import { prisma } from "../../../../../lib/prisma";
 import nodemailer from "nodemailer";
 import { randomBytes } from "crypto";
 
+function createTransporter() {
+  const serverUrl = process.env.EMAIL_SERVER;
+  const host = process.env.EMAIL_HOST;
+  const port = process.env.EMAIL_PORT ? parseInt(process.env.EMAIL_PORT, 10) : undefined;
+  const user = process.env.EMAIL_USER;
+  const pass = process.env.EMAIL_PASS;
+
+  if (serverUrl) {
+    try {
+      return nodemailer.createTransport(serverUrl);
+    } catch {
+      return null;
+    }
+  }
+  if (host && port && user && pass) {
+    try {
+      return nodemailer.createTransport({
+        host,
+        port,
+        secure: port === 465,
+        auth: { user, pass },
+      });
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
 export async function POST(request: Request) {
   try {
     const { email } = await request.json();
@@ -25,27 +54,16 @@ export async function POST(request: Request) {
       data: { identifier: email, token, expires },
     });
 
-    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+    // Base URL: prioriza NEXTAUTH_URL; depois VERCEL_URL; senão usa origem da requisição
+    const vercelUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined;
+    const originFromReq = new URL(request.url).origin;
+    const baseUrl = process.env.NEXTAUTH_URL || vercelUrl || originFromReq;
     const resetUrl = `${baseUrl}/reset?token=${token}`;
 
-    // Cria transporter a partir de URL ou das variáveis discretas
-    const emailServer = process.env.EMAIL_SERVER;
-    let transporter: nodemailer.Transporter | null = null;
-    if (emailServer && emailServer.trim().length > 0) {
-      transporter = nodemailer.createTransport(emailServer);
-    } else if (process.env.EMAIL_HOST && process.env.EMAIL_PORT && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-      transporter = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST,
-        port: Number(process.env.EMAIL_PORT),
-        secure: Number(process.env.EMAIL_PORT) === 465,
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-        },
-      });
-    } else {
-      // Evita erro quando SMTP não está configurado; retorna OK para não expor existência do e-mail
-      return NextResponse.json({ ok: true, message: "Configuração de e-mail ausente." });
+    const transporter = createTransporter();
+    if (!transporter) {
+      // Sem SMTP configurado: evitar falha em produção
+      return NextResponse.json({ ok: true, message: "Solicitação registrada. SMTP não configurado." });
     }
 
     await transporter.sendMail({
