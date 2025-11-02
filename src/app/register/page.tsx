@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { signIn } from "next-auth/react";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -82,6 +83,19 @@ export default function RegisterPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="mb-2">
+              <button
+                type="button"
+                className="btn-secondary px-5 py-2 w-full"
+                onClick={() => signIn("google")}
+              >
+                Continuar com Google
+              </button>
+              <div className="text-xs text-gray-500 mt-1">
+                Após cadastro com Google, seu acesso ficará pendente até aprovação.
+              </div>
+            </div>
+            {/* Campos de cadastro manual */}
             <div>
               <label className="block text-sm text-gray-700 mb-1">Nome completo</label>
               <input
