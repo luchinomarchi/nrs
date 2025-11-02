@@ -12,6 +12,15 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/forgot-password',
+        destination: '/forgot',
+        permanent: true,
+      },
+    ]
+  },
 }
 
 module.exports = nextConfig
