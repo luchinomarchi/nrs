@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
   // Permitir acesso à página inicial e páginas públicas
-  const publicPaths = ['/', '/login', '/register', '/about']
+  const publicPaths = ['/', '/login', '/register', '/about', '/forgot', '/reset']
   const { pathname } = request.nextUrl
 
   // Se for uma rota pública, permitir acesso

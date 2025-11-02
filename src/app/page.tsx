@@ -23,6 +23,9 @@ export default function Home() {
             <Link href="/register" className="btn-primary">
               Cadastrar
             </Link>
+            <Link href="/forgot" className="px-4 py-2 rounded-md text-primary-700 hover:text-primary-800">
+              Esqueceu a senha?
+            </Link>
           </div>
         </header>
 
