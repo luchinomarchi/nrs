@@ -28,7 +28,26 @@ export async function POST(request: Request) {
     const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
     const resetUrl = `${baseUrl}/reset?token=${token}`;
 
-    const transporter = nodemailer.createTransport(process.env.EMAIL_SERVER || "");
+    // Cria transporter a partir de URL ou das variáveis discretas
+    const emailServer = process.env.EMAIL_SERVER;
+    let transporter: nodemailer.Transporter | null = null;
+    if (emailServer && emailServer.trim().length > 0) {
+      transporter = nodemailer.createTransport(emailServer);
+    } else if (process.env.EMAIL_HOST && process.env.EMAIL_PORT && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+      transporter = nodemailer.createTransport({
+        host: process.env.EMAIL_HOST,
+        port: Number(process.env.EMAIL_PORT),
+        secure: Number(process.env.EMAIL_PORT) === 465,
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      });
+    } else {
+      // Evita erro quando SMTP não está configurado; retorna OK para não expor existência do e-mail
+      return NextResponse.json({ ok: true, message: "Configuração de e-mail ausente." });
+    }
+
     await transporter.sendMail({
       from: process.env.EMAIL_FROM || "no-reply@nossaronda.org",
       to: email,
