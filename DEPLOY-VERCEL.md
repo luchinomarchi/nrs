@@ -158,3 +158,43 @@ npm install
 ---
 
 **🎉 Parabéns! Seu app está online e acessível para o mundo todo!**
+
+## Variáveis de Ambiente Necessárias (Vercel)
+
+Defina estas variáveis em Settings → Environment Variables (Production e, opcionalmente, Preview):
+
+- `NEXTAUTH_SECRET` — segredo aleatório forte para NextAuth
+- `NEXTAUTH_URL` — URL de produção (ex.: `https://nrs.vercel.app`)
+- `DATABASE_URL` — conexão Postgres (mesmo formato do `.env.example`)
+- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` — credenciais OAuth do Google
+- `EMAIL_SERVER` — URI SMTP suportada pelo Nodemailer (ex.: `smtp://user:pass@smtp.example.com:587`)
+- `EMAIL_FROM` — remetente de e-mails (ex.: `NRS <no-reply@nossaronda.org>`) 
+
+## Build e Migrações do Prisma
+
+- O `package.json` possui `prebuild` que roda automaticamente:
+  - `prisma generate`
+  - `prisma migrate deploy`
+- Isso garante que o schema esteja sincronizado (campo `approved`, tabela `VerificationToken`, etc.).
+- Certifique-se de que o `DATABASE_URL` em produção esteja acessível na rede do Vercel.
+- Se o deploy falhar por migração, rode manualmente:
+  - `npx prisma migrate deploy` (apontando para o banco de produção)
+
+## Domínio e NEXTAUTH_URL
+
+- Configure um domínio em Settings → Domains (opcional).
+- Atualize `NEXTAUTH_URL` para o domínio de produção exato; isso é crítico para NextAuth.
+- Evite hardcode em `vercel.json`; use o painel do Vercel para variáveis por ambiente.
+
+## Validação Pós-Deploy (Fluxos de Autenticação)
+
+- `/login` — login por credenciais; exige usuário com `approved = true` e senha.
+- `/forgot` — envia e-mail com link de redefinição; verifique recebimento.
+- `/reset?token=...` — redefine a senha; token expira após uso.
+- `/api/admin/approve` — confirma atualização de `approved: true`.
+
+## Solução de Problemas Específicos
+
+- Erros 500 nas rotas de auth → verifique `NEXTAUTH_SECRET` e `NEXTAUTH_URL`.
+- E-mails não enviados → revise `EMAIL_SERVER`/`EMAIL_FROM` e credenciais SMTP (alguns provedores exigem App Password).
+- Migração não executa → confirme logs do Vercel, garanta acesso ao banco e execute `prisma migrate deploy` manualmente.
