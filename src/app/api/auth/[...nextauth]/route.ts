@@ -2,7 +2,8 @@ import NextAuth, { AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { prisma } from "@/src/lib/prisma";
+import { prisma } from "../../../../lib/prisma";
+import { verifyPassword } from "../../../../lib/auth";
 
 const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -20,27 +21,20 @@ const authOptions: AuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
-        // Simulação temporária enquanto não conectamos o banco
-        const users = [
-          { id: "1", name: "Admin", email: "admin@nrs.org", password: "admin", role: "admin", approved: true },
-          { id: "2", name: "Voluntário", email: "voluntario@nrs.org", password: "voluntario", role: "voluntario", approved: false },
-        ];
-        const user = users.find(
-          (u) => u.email === credentials.email && u.password === credentials.password
-        );
-        if (!user) return null;
-        return { id: user.id, name: user.name, email: user.email, role: user.role, approved: user.approved } as any;
+        const user = await prisma.user.findUnique({ where: { email: credentials.email } });
+        if (!user || !user.password) return null;
+        const ok = await verifyPassword(credentials.password, user.password);
+        if (!ok) return null;
+        return { id: user.id, name: user.name || undefined, email: user.email || undefined, role: user.role, approved: user.approved } as any;
       },
     }),
   ],
   callbacks: {
     async signIn({ user, account }) {
       // Bloquear login se o usuário não estiver aprovado
-      // Para OAuth (Google), precisamos checar no banco com Prisma
       try {
         if (account?.provider === "google") {
           const dbUser = await prisma.user.findUnique({ where: { email: user.email || "" } });
-          // Se não existir, cria com approved=false
           if (!dbUser) {
             await prisma.user.create({
               data: {
@@ -56,7 +50,7 @@ const authOptions: AuthOptions = {
           if (!dbUser.approved) return false;
           return true;
         }
-        // Credenciais simuladas
+        // Credenciais
         if ((user as any)?.approved === false) return false;
         return true;
       } catch (e) {
@@ -68,7 +62,6 @@ const authOptions: AuthOptions = {
         token.role = (user as any).role ?? token.role;
         token.approved = (user as any).approved ?? token.approved;
       } else {
-        // sincroniza do banco quando possível
         if (token.email) {
           try {
             const dbUser = await prisma.user.findUnique({ where: { email: token.email as string } });

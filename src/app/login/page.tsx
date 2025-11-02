@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -17,22 +18,16 @@ export default function Login() {
     setLoading(true);
     setError('');
 
-    // Simulação de login bem-sucedido
     try {
-      // Em uma implementação real, isso seria uma chamada à API
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Simulando login bem-sucedido para admin
-      if (email === 'admin@nossaronda.org' && password === 'admin123') {
-        router.push('/admin/dashboard');
-      } 
-      // Simulando login bem-sucedido para voluntário
-      else if (email === 'voluntario@nossaronda.org' && password === 'voluntario123') {
-        router.push('/voluntario/perfil');
-      } 
-      // Simulando erro de login
-      else {
-        setError('Email ou senha inválidos');
+      const res = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      });
+      if (res?.error) {
+        setError('Email ou senha inválidos ou aprovação pendente');
+      } else {
+        router.push('/');
       }
     } catch (err) {
       setError('Ocorreu um erro ao fazer login. Tente novamente.');
@@ -110,7 +105,7 @@ export default function Login() {
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                   Senha
                 </label>
-                <Link href="/forgot-password" className="text-sm text-primary-700 hover:text-primary-800">
+                <Link href="/forgot" className="text-sm text-primary-700 hover:text-primary-800">
                   Esqueceu a senha?
                 </Link>
               </div>
@@ -158,15 +153,17 @@ export default function Login() {
             <div className="mt-6 grid grid-cols-2 gap-3">
               <button
                 type="button"
+                onClick={() => signIn('google')}
                 className="w-full py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
               >
                 Google
               </button>
               <button
                 type="button"
-                className="w-full py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                disabled
+                className="w-full py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-300 cursor-not-allowed"
               >
-                Facebook
+                Facebook (em breve)
               </button>
             </div>
           </div>
