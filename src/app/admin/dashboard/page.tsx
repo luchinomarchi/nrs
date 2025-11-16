@@ -1,28 +1,134 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { ChartBarIcon, UsersIcon, CalendarDaysIcon, CheckBadgeIcon, TrophyIcon, UserGroupIcon, EnvelopeIcon, Cog6ToothIcon } from '@heroicons/react/24/outline';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
-// Dados simulados para o dashboard
-const mockData = {
-  stats: {
-    voluntariosAtivos: 128,
-    proximosEventos: 5,
-    checkinsRealizados: 87,
-    equipesAtivas: 8
-  },
-  voluntarios: [
-    { id: 1, nome: 'Ana Silva', email: 'ana.silva@email.com', equipe: 'Logística', participacoes: 24, pontos: 480, status: 'Ativo' },
-    { id: 2, nome: 'Carlos Oliveira', email: 'carlos.oliveira@email.com', equipe: 'Cozinha', participacoes: 18, pontos: 360, status: 'Ativo' },
-    { id: 3, nome: 'Mariana Santos', email: 'mariana.santos@email.com', equipe: 'Atendimento', participacoes: 15, pontos: 300, status: 'Ativo' },
-    { id: 4, nome: 'Pedro Costa', email: 'pedro.costa@email.com', equipe: 'Logística', participacoes: 12, pontos: 240, status: 'Ativo' },
-    { id: 5, nome: 'Juliana Lima', email: 'juliana.lima@email.com', equipe: 'Cozinha', participacoes: 8, pontos: 160, status: 'Pendente' }
-  ]
-};
+type Stats = { voluntariosAtivos: number; proximosEventos: number; checkinsRealizados: number; equipesAtivas: number };
+type Vol = { id: string; nome: string; email: string; equipe: string; participacoes: number; pontos: number; status: string };
+type TeamDist = { equipe: string; count: number };
 
 export default function AdminDashboard() {
   const [activeMenuItem, setActiveMenuItem] = useState('dashboard');
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [voluntarios, setVoluntarios] = useState<Vol[]>([]);
+  const [teams, setTeams] = useState<TeamDist[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState('');
+  const [eventos, setEventos] = useState<any[]>([]);
+  const [novoEvento, setNovoEvento] = useState({ nome: '', descricao: '', data: '', inicio: '', fim: '', local: '', endereco: '', vagasTotal: 0 });
+  const [equipes, setEquipes] = useState<any[]>([]);
+  const [novaEquipe, setNovaEquipe] = useState({ nome: '', descricao: '' });
+  const [checkResumo, setCheckResumo] = useState<any | null>(null);
+  const [checkRegistros, setCheckRegistros] = useState<any[]>([]);
+  const [conquistas, setConquistas] = useState<any[]>([]);
+  const [novaConquista, setNovaConquista] = useState({ nome: '', descricao: '', categoria: '', icone: '', pontos: 0 });
+  const [comAssunto, setComAssunto] = useState('');
+  const [comMensagem, setComMensagem] = useState('');
+  const [comAlvo, setComAlvo] = useState<'all' | 'team'>('all');
+  const [comEquipe, setComEquipe] = useState<string>('');
+  const [engajamento, setEngajamento] = useState<{ date: string; count: number }[]>([]);
+  const [org, setOrg] = useState({ name: '', logoUrl: '', contactEmail: '', timezone: '', domain: '' });
+  const [checkRules, setCheckRules] = useState({ toleranceMinutes: 10, pointsPerPresence: 10 });
+  const [pointsRules, setPointsRules] = useState({ presence: 10, participation: 20 });
+  const [envInfo, setEnvInfo] = useState<any>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      try {
+        setLoading(true);
+        const [sRes, vRes, tRes] = await Promise.all([
+          fetch('/api/admin/dashboard/stats'),
+          fetch('/api/admin/dashboard/volunteers'),
+          fetch('/api/admin/dashboard/teams-distribution'),
+          
+        ]);
+        if (!mounted) return;
+        if (!sRes.ok || !vRes.ok || !tRes.ok) {
+          setErr('Falha ao carregar dados do dashboard');
+          setLoading(false);
+          return;
+        }
+        const sJson = await sRes.json();
+        const vJson = await vRes.json();
+        const tJson = await tRes.json();
+        setStats(sJson.stats as Stats);
+        setVoluntarios(vJson.voluntarios as Vol[]);
+        setTeams(tJson.distribuicao as TeamDist[]);
+        setLoading(false);
+      } catch {
+        if (!mounted) return;
+        setErr('Erro inesperado ao carregar dashboard');
+        setLoading(false);
+      }
+    }
+    load();
+    return () => { mounted = false };
+  }, []);
+
+  useEffect(() => {
+    async function loadSection() {
+      if (activeMenuItem === 'eventos') {
+        const res = await fetch('/api/admin/events');
+        if (res.ok) {
+          const j = await res.json();
+          setEventos(j.eventos || []);
+        }
+      } else if (activeMenuItem === 'equipes') {
+        const res = await fetch('/api/admin/teams');
+        if (res.ok) {
+          const j = await res.json();
+          setEquipes(j.equipes || []);
+        }
+      } else if (activeMenuItem === 'voluntarios') {
+        const res = await fetch('/api/admin/dashboard/volunteers');
+        if (res.ok) {
+          const j = await res.json();
+          setVoluntarios(j.voluntarios || []);
+        }
+      } else if (activeMenuItem === 'checkins') {
+        const res = await fetch('/api/admin/checkins');
+        if (res.ok) {
+          const j = await res.json();
+          setCheckResumo(j.resumo);
+          setCheckRegistros(j.registros);
+        }
+      } else if (activeMenuItem === 'conquistas') {
+        const res = await fetch('/api/admin/conquistas');
+        if (res.ok) {
+          const j = await res.json();
+          setConquistas(j.conquistas || []);
+        }
+      } else if (activeMenuItem === 'dashboard') {
+        const res = await fetch('/api/admin/dashboard/engagement');
+        if (res.ok) {
+          const j = await res.json();
+          setEngajamento(j.series || []);
+        }
+      } else if (activeMenuItem === 'comunicacoes') {
+        const res = await fetch('/api/admin/teams');
+        if (res.ok) {
+          const j = await res.json();
+          setEquipes(j.equipes || []);
+        }
+      } else if (activeMenuItem === 'configuracoes') {
+        const [oRes, cRes, pRes, eRes] = await Promise.all([
+          fetch('/api/admin/settings/org.profile'),
+          fetch('/api/admin/settings/checkin.rules'),
+          fetch('/api/admin/settings/points.rules'),
+          fetch('/api/admin/system/env'),
+        ]);
+        if (oRes.ok) { const j = await oRes.json(); if (j.value) setOrg(j.value); }
+        if (cRes.ok) { const j = await cRes.json(); if (j.value) setCheckRules(j.value); }
+        if (pRes.ok) { const j = await pRes.json(); if (j.value) setPointsRules(j.value); }
+        if (eRes.ok) { const j = await eRes.json(); setEnvInfo(j.env); }
+      }
+    }
+    loadSection();
+  }, [activeMenuItem]);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -47,7 +153,7 @@ export default function AdminDashboard() {
               className={`flex items-center px-4 py-3 ${activeMenuItem === 'dashboard' ? 'bg-primary-600' : 'hover:bg-primary-500/20'}`}
               onClick={() => setActiveMenuItem('dashboard')}
             >
-              <span className="mr-3">📊</span>
+              <ChartBarIcon className="w-5 h-5 mr-3" />
               <span>Dashboard</span>
             </a>
             <a 
@@ -55,7 +161,7 @@ export default function AdminDashboard() {
               className={`flex items-center px-4 py-3 ${activeMenuItem === 'voluntarios' ? 'bg-primary-600' : 'hover:bg-primary-500/20'}`}
               onClick={() => setActiveMenuItem('voluntarios')}
             >
-              <span className="mr-3">👥</span>
+              <UsersIcon className="w-5 h-5 mr-3" />
               <span>Voluntários</span>
             </a>
             <a 
@@ -63,7 +169,7 @@ export default function AdminDashboard() {
               className={`flex items-center px-4 py-3 ${activeMenuItem === 'eventos' ? 'bg-primary-600' : 'hover:bg-primary-500/20'}`}
               onClick={() => setActiveMenuItem('eventos')}
             >
-              <span className="mr-3">📅</span>
+              <CalendarDaysIcon className="w-5 h-5 mr-3" />
               <span>Eventos</span>
             </a>
             <a 
@@ -71,7 +177,7 @@ export default function AdminDashboard() {
               className={`flex items-center px-4 py-3 ${activeMenuItem === 'checkins' ? 'bg-primary-600' : 'hover:bg-primary-500/20'}`}
               onClick={() => setActiveMenuItem('checkins')}
             >
-              <span className="mr-3">✓</span>
+              <CheckBadgeIcon className="w-5 h-5 mr-3" />
               <span>Check-ins</span>
             </a>
             <a 
@@ -79,7 +185,7 @@ export default function AdminDashboard() {
               className={`flex items-center px-4 py-3 ${activeMenuItem === 'conquistas' ? 'bg-primary-600' : 'hover:bg-primary-500/20'}`}
               onClick={() => setActiveMenuItem('conquistas')}
             >
-              <span className="mr-3">🏆</span>
+              <TrophyIcon className="w-5 h-5 mr-3" />
               <span>Conquistas</span>
             </a>
             <a 
@@ -87,7 +193,7 @@ export default function AdminDashboard() {
               className={`flex items-center px-4 py-3 ${activeMenuItem === 'equipes' ? 'bg-primary-600' : 'hover:bg-primary-500/20'}`}
               onClick={() => setActiveMenuItem('equipes')}
             >
-              <span className="mr-3">👥</span>
+              <UserGroupIcon className="w-5 h-5 mr-3" />
               <span>Equipes</span>
             </a>
             <a 
@@ -95,7 +201,7 @@ export default function AdminDashboard() {
               className={`flex items-center px-4 py-3 ${activeMenuItem === 'comunicacoes' ? 'bg-primary-600' : 'hover:bg-primary-500/20'}`}
               onClick={() => setActiveMenuItem('comunicacoes')}
             >
-              <span className="mr-3">📨</span>
+              <EnvelopeIcon className="w-5 h-5 mr-3" />
               <span>Comunicações</span>
             </a>
             <a 
@@ -103,7 +209,7 @@ export default function AdminDashboard() {
               className={`flex items-center px-4 py-3 ${activeMenuItem === 'configuracoes' ? 'bg-primary-600' : 'hover:bg-primary-500/20'}`}
               onClick={() => setActiveMenuItem('configuracoes')}
             >
-              <span className="mr-3">⚙️</span>
+              <Cog6ToothIcon className="w-5 h-5 mr-3" />
               <span>Configurações</span>
             </a>
           </nav>
@@ -130,85 +236,100 @@ export default function AdminDashboard() {
             </div>
           </div>
           
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="card-primary rounded-lg shadow p-6">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="text-gray-500 text-sm">Voluntários Ativos</h3>
-                  <p className="text-2xl font-semibold">{mockData.stats.voluntariosAtivos}</p>
+          {activeMenuItem === 'dashboard' && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div className="card-primary rounded-lg shadow p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h3 className="text-gray-500 text-sm">Voluntários Ativos</h3>
+                      <p className="text-2xl font-semibold">{stats?.voluntariosAtivos ?? '-'}</p>
+                    </div>
+                    <div className="p-2 rounded-full bg-primary-100 text-primary-700"><UsersIcon className="w-5 h-5" /></div>
+                  </div>
+                  <p className="text-green-500 text-sm">+12% desde o mês passado</p>
                 </div>
-                <div className="p-2 rounded-full bg-primary-100 text-primary-700">👥</div>
-              </div>
-              <p className="text-green-500 text-sm">+12% desde o mês passado</p>
-            </div>
-            
-            <div className="card-primary rounded-lg shadow p-6">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="text-gray-500 text-sm">Próximos Eventos</h3>
-                  <p className="text-2xl font-semibold">{mockData.stats.proximosEventos}</p>
+                <div className="card-primary rounded-lg shadow p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h3 className="text-gray-500 text-sm">Próximos Eventos</h3>
+                      <p className="text-2xl font-semibold">{stats?.proximosEventos ?? '-'}</p>
+                    </div>
+                    <div className="p-2 rounded-full bg-secondary-100 text-secondary-700"><CalendarDaysIcon className="w-5 h-5" /></div>
+                  </div>
+                  <p className="text-green-500 text-sm">+2 novos eventos</p>
                 </div>
-                <div className="p-2 rounded-full bg-secondary-100 text-secondary-700">📅</div>
-              </div>
-              <p className="text-green-500 text-sm">+2 novos eventos</p>
-            </div>
-            
-            <div className="card-primary rounded-lg shadow p-6">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="text-gray-500 text-sm">Check-ins Realizados</h3>
-                  <p className="text-2xl font-semibold">{mockData.stats.checkinsRealizados}</p>
+                <div className="card-primary rounded-lg shadow p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h3 className="text-gray-500 text-sm">Check-ins Realizados</h3>
+                      <p className="text-2xl font-semibold">{stats?.checkinsRealizados ?? '-'}</p>
+                    </div>
+                    <div className="p-2 rounded-full bg-accent-100 text-accent-700"><CheckBadgeIcon className="w-5 h-5" /></div>
+                  </div>
+                  <p className="text-green-500 text-sm">+23% desde o último evento</p>
                 </div>
-                <div className="p-2 rounded-full bg-accent-100 text-accent-700">✓</div>
-              </div>
-              <p className="text-green-500 text-sm">+23% desde o último evento</p>
-            </div>
-            
-            <div className="card-primary rounded-lg shadow p-6">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="text-gray-500 text-sm">Equipes Ativas</h3>
-                  <p className="text-2xl font-semibold">{mockData.stats.equipesAtivas}</p>
+                <div className="card-primary rounded-lg shadow p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h3 className="text-gray-500 text-sm">Equipes Ativas</h3>
+                      <p className="text-2xl font-semibold">{stats?.equipesAtivas ?? '-'}</p>
+                    </div>
+                    <div className="p-2 rounded-full bg-purple-100 text-purple-700"><UserGroupIcon className="w-5 h-5" /></div>
+                  </div>
+                  <p className="text-green-500 text-sm">+1 nova equipe</p>
                 </div>
-                <div className="p-2 rounded-full bg-purple-100 text-purple-700">👥</div>
               </div>
-              <p className="text-green-500 text-sm">+1 nova equipe</p>
-            </div>
-          </div>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <div className="card-primary rounded-lg shadow p-6 lg:col-span-2">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-semibold">Engajamento de Voluntários</h3>
+                    <select className="border rounded px-2 py-1 text-sm">
+                      <option>Últimos 30 dias</option>
+                      <option>Últimos 90 dias</option>
+                      <option>Este ano</option>
+                    </select>
+                  </div>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={engajamento} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                        <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
+                        <Tooltip />
+                        <Line type="monotone" dataKey="count" stroke="#2563eb" strokeWidth={2} dot={false} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+                <div className="card-primary rounded-lg shadow p-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-semibold">Distribuição por Equipe</h3>
+                    <select className="border rounded px-2 py-1 text-sm">
+                      <option>Todos</option>
+                      <option>Ativos</option>
+                      <option>Inativos</option>
+                    </select>
+                  </div>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie data={teams} dataKey="count" nameKey="equipe" cx="50%" cy="50%" outerRadius={80} label>
+                          {teams.map((_, i) => (
+                            <Cell key={`cell-${i}`} fill={["#2563eb","#10b981","#f59e0b","#ef4444","#8b5cf6","#14b8a6"][i % 6]} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
           
-          {/* Charts Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <div className="card-primary rounded-lg shadow p-6 lg:col-span-2">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-semibold">Engajamento de Voluntários</h3>
-                <select className="border rounded px-2 py-1 text-sm">
-                  <option>Últimos 30 dias</option>
-                  <option>Últimos 90 dias</option>
-                  <option>Este ano</option>
-                </select>
-              </div>
-              <div className="h-64 bg-gray-100 rounded flex items-center justify-center text-gray-500">
-                [Gráfico de Engajamento de Voluntários]
-              </div>
-            </div>
-            
-            <div className="card-primary rounded-lg shadow p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-semibold">Distribuição por Equipe</h3>
-                <select className="border rounded px-2 py-1 text-sm">
-                  <option>Todos</option>
-                  <option>Ativos</option>
-                  <option>Inativos</option>
-                </select>
-              </div>
-              <div className="h-64 bg-gray-100 rounded flex items-center justify-center text-gray-500">
-                [Gráfico de Pizza]
-              </div>
-            </div>
-          </div>
-          
-          {/* Volunteers Table */}
+          {activeMenuItem === 'voluntarios' && (
           <div className="card-primary rounded-lg shadow overflow-hidden">
             <div className="p-6 border-b flex justify-between items-center">
               <h3 className="font-semibold">Voluntários por Frequência</h3>
@@ -247,7 +368,7 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {mockData.voluntarios.map((voluntario) => (
+                  {voluntarios.map((voluntario) => (
                     <tr key={voluntario.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         {voluntario.nome}
@@ -302,6 +423,291 @@ export default function AdminDashboard() {
               </div>
             </div>
           </div>
+          )}
+
+        {activeMenuItem === 'eventos' && (
+            <div className="mt-8 space-y-6">
+              <div className="card-primary rounded-lg shadow p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-semibold">Eventos</h3>
+                  <button className="btn-primary" onClick={async () => {
+                    const body = { nome: novoEvento.nome, descricao: novoEvento.descricao, data: novoEvento.data, horarioInicio: novoEvento.inicio, horarioFim: novoEvento.fim, local: novoEvento.local, endereco: novoEvento.endereco, vagasTotal: Number(novoEvento.vagasTotal) };
+                    const r = await fetch('/api/admin/events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+                    if (r.ok) {
+                      const j = await r.json();
+                      setEventos((prev) => [...prev, j.evento]);
+                      setNovoEvento({ nome: '', descricao: '', data: '', inicio: '', fim: '', local: '', endereco: '', vagasTotal: 0 });
+                    }
+                  }}>+ Adicionar</button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <input className="border rounded px-3 py-2" placeholder="Nome" value={novoEvento.nome} onChange={(e) => setNovoEvento({ ...novoEvento, nome: e.target.value })} />
+                  <input className="border rounded px-3 py-2" placeholder="Descrição" value={novoEvento.descricao} onChange={(e) => setNovoEvento({ ...novoEvento, descricao: e.target.value })} />
+                  <input className="border rounded px-3 py-2" type="date" value={novoEvento.data} onChange={(e) => setNovoEvento({ ...novoEvento, data: e.target.value })} />
+                  <input className="border rounded px-3 py-2" type="datetime-local" value={novoEvento.inicio} onChange={(e) => setNovoEvento({ ...novoEvento, inicio: e.target.value })} />
+                  <input className="border rounded px-3 py-2" type="datetime-local" value={novoEvento.fim} onChange={(e) => setNovoEvento({ ...novoEvento, fim: e.target.value })} />
+                  <input className="border rounded px-3 py-2" placeholder="Local" value={novoEvento.local} onChange={(e) => setNovoEvento({ ...novoEvento, local: e.target.value })} />
+                  <input className="border rounded px-3 py-2" placeholder="Endereço" value={novoEvento.endereco} onChange={(e) => setNovoEvento({ ...novoEvento, endereco: e.target.value })} />
+                  <input className="border rounded px-3 py-2" type="number" placeholder="Vagas" value={novoEvento.vagasTotal} onChange={(e) => setNovoEvento({ ...novoEvento, vagasTotal: e.target.value as any })} />
+                </div>
+              </div>
+
+              <div className="card-primary rounded-lg shadow overflow-hidden">
+                <div className="p-6 border-b flex justify-between items-center">
+                  <h3 className="font-semibold">Lista de Eventos</h3>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Local</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {eventos.map((ev) => (
+                        <tr key={ev.id}>
+                          <td className="px-6 py-4">{ev.nome}</td>
+                          <td className="px-6 py-4">{new Date(ev.data).toLocaleDateString()}</td>
+                          <td className="px-6 py-4">{ev.local}</td>
+                          <td className="px-6 py-4">
+                            <button className="px-3 py-1 border rounded mr-2" onClick={async () => {
+                              await fetch(`/api/admin/events/${ev.id}`, { method: 'DELETE' });
+                              setEventos((prev) => prev.filter((x) => x.id !== ev.id));
+                            }}>Excluir</button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+        )}
+
+        {activeMenuItem === 'equipes' && (
+          <div className="mt-8 space-y-6">
+            <div className="card-primary rounded-lg shadow p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-semibold">Equipes</h3>
+                <button className="btn-primary" onClick={async () => {
+                  const r = await fetch('/api/admin/teams', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(novaEquipe) });
+                  if (r.ok) {
+                    const j = await r.json();
+                    setEquipes((prev) => [...prev, j.equipe]);
+                    setNovaEquipe({ nome: '', descricao: '' });
+                  }
+                }}>+ Adicionar</button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input className="border rounded px-3 py-2" placeholder="Nome" value={novaEquipe.nome} onChange={(e) => setNovaEquipe({ ...novaEquipe, nome: e.target.value })} />
+                <input className="border rounded px-3 py-2" placeholder="Descrição" value={novaEquipe.descricao} onChange={(e) => setNovaEquipe({ ...novaEquipe, descricao: e.target.value })} />
+              </div>
+            </div>
+
+            <div className="card-primary rounded-lg shadow overflow-hidden">
+              <div className="p-6 border-b flex justify-between items-center">
+                <h3 className="font-semibold">Lista de Equipes</h3>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {equipes.map((eq) => (
+                      <tr key={eq.id}>
+                        <td className="px-6 py-4">{eq.nome}</td>
+                        <td className="px-6 py-4">{eq.descricao || ''}</td>
+                        <td className="px-6 py-4">
+                          <button className="px-3 py-1 border rounded mr-2" onClick={async () => {
+                            await fetch(`/api/admin/teams/${eq.id}`, { method: 'DELETE' });
+                            setEquipes((prev) => prev.filter((x) => x.id !== eq.id));
+                          }}>Excluir</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeMenuItem === 'checkins' && (
+          <div className="mt-8 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="card-primary rounded-lg shadow p-6"><h3 className="text-sm text-gray-500">Total</h3><p className="text-2xl font-semibold">{checkResumo?.total ?? '-'}</p></div>
+              <div className="card-primary rounded-lg shadow p-6"><h3 className="text-sm text-gray-500">Presentes</h3><p className="text-2xl font-semibold">{checkResumo?.presentes ?? '-'}</p></div>
+              <div className="card-primary rounded-lg shadow p-6"><h3 className="text-sm text-gray-500">Ausentes</h3><p className="text-2xl font-semibold">{checkResumo?.ausentes ?? '-'}</p></div>
+              <div className="card-primary rounded-lg shadow p-6"><h3 className="text-sm text-gray-500">Justificados</h3><p className="text-2xl font-semibold">{checkResumo?.justificados ?? '-'}</p></div>
+            </div>
+            <div className="card-primary rounded-lg shadow overflow-hidden">
+              <div className="p-6 border-b"><h3 className="font-semibold">Registros recentes</h3></div>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50"><tr><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Voluntário</th><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Evento</th><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pontos</th><th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th></tr></thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {checkRegistros.map((r) => (
+                      <tr key={r.id}><td className="px-6 py-4">{r.voluntario}</td><td className="px-6 py-4">{r.evento}</td><td className="px-6 py-4">{r.status}</td><td className="px-6 py-4">{r.pontos}</td><td className="px-6 py-4">{new Date(r.dataCheckin).toLocaleString()}</td></tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeMenuItem === 'conquistas' && (
+          <div className="mt-8 space-y-6">
+            <div className="card-primary rounded-lg shadow p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-semibold">Conquistas</h3>
+                <button className="btn-primary" onClick={async () => {
+                  const r = await fetch('/api/admin/conquistas', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(novaConquista) });
+                  if (r.ok) {
+                    const j = await r.json();
+                    setConquistas((prev) => [...prev, j.conquista]);
+                    setNovaConquista({ nome: '', descricao: '', categoria: '', icone: '', pontos: 0 });
+                  }
+                }}>+ Adicionar</button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <input className="border rounded px-3 py-2" placeholder="Nome" value={novaConquista.nome} onChange={(e) => setNovaConquista({ ...novaConquista, nome: e.target.value })} />
+                <input className="border rounded px-3 py-2" placeholder="Descrição" value={novaConquista.descricao} onChange={(e) => setNovaConquista({ ...novaConquista, descricao: e.target.value })} />
+                <input className="border rounded px-3 py-2" placeholder="Categoria" value={novaConquista.categoria} onChange={(e) => setNovaConquista({ ...novaConquista, categoria: e.target.value })} />
+                <input className="border rounded px-3 py-2" placeholder="Ícone" value={novaConquista.icone} onChange={(e) => setNovaConquista({ ...novaConquista, icone: e.target.value })} />
+                <input className="border rounded px-3 py-2" type="number" placeholder="Pontos" value={novaConquista.pontos} onChange={(e) => setNovaConquista({ ...novaConquista, pontos: Number(e.target.value) })} />
+              </div>
+            </div>
+
+            <div className="card-primary rounded-lg shadow overflow-hidden">
+              <div className="p-6 border-b flex justify-between items-center">
+                <h3 className="font-semibold">Lista de Conquistas</h3>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoria</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pontos</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {conquistas.map((c) => (
+                      <tr key={c.id}>
+                        <td className="px-6 py-4">{c.nome}</td>
+                        <td className="px-6 py-4">{c.categoria}</td>
+                        <td className="px-6 py-4">{c.pontos}</td>
+                        <td className="px-6 py-4">
+                          <button className="px-3 py-1 border rounded mr-2" onClick={async () => {
+                            await fetch(`/api/admin/conquistas/${c.id}`, { method: 'DELETE' });
+                            setConquistas((prev) => prev.filter((x) => x.id !== c.id));
+                          }}>Excluir</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeMenuItem === 'comunicacoes' && (
+          <div className="mt-8 space-y-6">
+            <div className="card-primary rounded-lg shadow p-6">
+              <h3 className="font-semibold mb-4">Enviar comunicação</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <input className="border rounded px-3 py-2" placeholder="Assunto" value={comAssunto} onChange={(e) => setComAssunto(e.target.value)} />
+                <select className="border rounded px-3 py-2" value={comAlvo} onChange={(e) => setComAlvo(e.target.value as any)}>
+                  <option value="all">Todos voluntários</option>
+                  <option value="team">Por equipe</option>
+                </select>
+                {comAlvo === 'team' && (
+                  <select className="border rounded px-3 py-2" value={comEquipe} onChange={(e) => setComEquipe(e.target.value)}>
+                    <option value="">Selecione a equipe</option>
+                    {equipes.map((eq) => (
+                      <option key={eq.id} value={eq.id}>{eq.nome}</option>
+                    ))}
+                  </select>
+                )}
+              </div>
+              <textarea className="border rounded px-3 py-2 w-full h-40" placeholder="Mensagem" value={comMensagem} onChange={(e) => setComMensagem(e.target.value)} />
+              <div className="mt-4">
+                <button className="btn-primary" onClick={async () => {
+                  const body = { alvo: comAlvo, equipeId: comAlvo === 'team' ? comEquipe : undefined, assunto: comAssunto, mensagem: comMensagem };
+                  const r = await fetch('/api/admin/communications/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+                  if (r.ok) {
+                    setComAssunto(''); setComMensagem(''); setComAlvo('all'); setComEquipe('');
+                  }
+                }}>Enviar</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeMenuItem === 'configuracoes' && (
+          <div className="mt-8 space-y-6">
+            <div className="card-primary rounded-lg shadow p-6">
+              <h3 className="font-semibold mb-4">Organização</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input className="border rounded px-3 py-2" placeholder="Nome" value={org.name} onChange={(e) => setOrg({ ...org, name: e.target.value })} />
+                <input className="border rounded px-3 py-2" placeholder="Logo URL" value={org.logoUrl} onChange={(e) => setOrg({ ...org, logoUrl: e.target.value })} />
+                <input className="border rounded px-3 py-2" placeholder="E-mail de contato" value={org.contactEmail} onChange={(e) => setOrg({ ...org, contactEmail: e.target.value })} />
+                <input className="border rounded px-3 py-2" placeholder="Fuso horário" value={org.timezone} onChange={(e) => setOrg({ ...org, timezone: e.target.value })} />
+                <input className="border rounded px-3 py-2" placeholder="Domínio" value={org.domain} onChange={(e) => setOrg({ ...org, domain: e.target.value })} />
+              </div>
+              <div className="mt-4"><button className="btn-primary" onClick={async () => {
+                await fetch('/api/admin/settings/org.profile', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ value: org }) });
+              }}>Salvar</button></div>
+            </div>
+
+            <div className="card-primary rounded-lg shadow p-6">
+              <h3 className="font-semibold mb-4">Check-ins</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input className="border rounded px-3 py-2" type="number" placeholder="Tolerância (min)" value={checkRules.toleranceMinutes} onChange={(e) => setCheckRules({ ...checkRules, toleranceMinutes: Number(e.target.value) })} />
+                <input className="border rounded px-3 py-2" type="number" placeholder="Pontos por presença" value={checkRules.pointsPerPresence} onChange={(e) => setCheckRules({ ...checkRules, pointsPerPresence: Number(e.target.value) })} />
+              </div>
+              <div className="mt-4"><button className="btn-primary" onClick={async () => {
+                await fetch('/api/admin/settings/checkin.rules', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ value: checkRules }) });
+              }}>Salvar</button></div>
+            </div>
+
+            <div className="card-primary rounded-lg shadow p-6">
+              <h3 className="font-semibold mb-4">Pontuação & Conquistas</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input className="border rounded px-3 py-2" type="number" placeholder="Pontos por presença" value={pointsRules.presence} onChange={(e) => setPointsRules({ ...pointsRules, presence: Number(e.target.value) })} />
+                <input className="border rounded px-3 py-2" type="number" placeholder="Pontos por participação em evento" value={pointsRules.participation} onChange={(e) => setPointsRules({ ...pointsRules, participation: Number(e.target.value) })} />
+              </div>
+              <div className="mt-4"><button className="btn-primary" onClick={async () => {
+                await fetch('/api/admin/settings/points.rules', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ value: pointsRules }) });
+              }}>Salvar</button></div>
+            </div>
+
+            <div className="card-primary rounded-lg shadow p-6">
+              <h3 className="font-semibold mb-4">Sistema (somente leitura)</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+                <div><span className="font-medium">NEXTAUTH_URL:</span> {envInfo?.NEXTAUTH_URL ?? '-'}</div>
+                <div><span className="font-medium">NEXTAUTH_SECRET:</span> {envInfo?.NEXTAUTH_SECRET ?? '-'}</div>
+                <div><span className="font-medium">DATABASE_URL:</span> {envInfo?.DATABASE_URL ?? '-'}</div>
+                <div><span className="font-medium">EMAIL_HOST:</span> {envInfo?.EMAIL_HOST ?? '-'}</div>
+                <div><span className="font-medium">EMAIL_PORT:</span> {envInfo?.EMAIL_PORT ?? '-'}</div>
+                <div><span className="font-medium">EMAIL_USER:</span> {envInfo?.EMAIL_USER ?? '-'}</div>
+                <div><span className="font-medium">EMAIL_PASS:</span> {envInfo?.EMAIL_PASS ?? '-'}</div>
+                <div><span className="font-medium">ADMIN_BOOTSTRAP_SECRET:</span> {envInfo?.ADMIN_BOOTSTRAP_SECRET ?? '-'}</div>
+              </div>
+            </div>
+          </div>
+        )}
         </div>
       </div>
     </div>

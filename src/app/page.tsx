@@ -163,7 +163,6 @@ export default function Home() {
                   height={40}
                   className="h-8 w-auto mr-3"
                 />
-                <h3 className="text-lg font-semibold">Nossa Ronda Solidária</h3>
               </div>
               <p className="text-gray-600">
                 Transformando vidas através do voluntariado e da solidariedade.
