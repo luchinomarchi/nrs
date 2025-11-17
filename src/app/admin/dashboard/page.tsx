@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ChartBarIcon, UsersIcon, CalendarDaysIcon, CheckBadgeIcon, TrophyIcon, UserGroupIcon, EnvelopeIcon, Cog6ToothIcon } from '@heroicons/react/24/outline';
+import { ChartBarIcon, UsersIcon, CalendarDaysIcon, CheckBadgeIcon, TrophyIcon, UserGroupIcon, EnvelopeIcon, Cog6ToothIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { getSession, signOut } from 'next-auth/react'
 
@@ -59,6 +59,7 @@ export default function AdminDashboard() {
   const [pwdCurrent, setPwdCurrent] = useState<string>('')
   const [pwdNew, setPwdNew] = useState<string>('')
   const [pwdConfirm, setPwdConfirm] = useState<string>('')
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
   function initialsFrom(n: string) {
     const s = (n || '').trim()
@@ -199,7 +200,7 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-gray-100">
       <div className="flex">
         {/* Sidebar */}
-        <div className="w-64 header-gradient text-white min-h-screen fixed">
+        <div className="w-64 header-gradient text-white min-h-screen fixed hidden md:block">
           <div className="p-4 border-b border-primary-500">
             <div className="flex items-center">
               <Image 
@@ -289,7 +290,14 @@ export default function AdminDashboard() {
         </div>
         
         {/* Main Content */}
-        <div className="ml-64 flex-1 p-8">
+        <div className="md:ml-64 flex-1 p-4 sm:p-8">
+          <div className="md:hidden flex justify-between items-center mb-4">
+            <button className="inline-flex items-center gap-2 px-3 py-2 rounded-md border" onClick={() => setMobileNavOpen(true)}>
+              <Bars3Icon className="w-5 h-5" />
+              <span>Menu</span>
+            </button>
+            <Link href="/admin/dashboard" className="text-sm font-medium text-primary-700">Home</Link>
+          </div>
           <div className="flex justify-between items-center mb-8 pb-4 border-b">
             <h1 className="text-2xl font-semibold">Dashboard</h1>
             
@@ -329,7 +337,47 @@ export default function AdminDashboard() {
               </div>
             </div>
           </div>
-          
+
+          {mobileNavOpen && (
+            <div className="md:hidden fixed inset-0 z-30">
+              <div className="absolute inset-0 bg-black/30" onClick={() => setMobileNavOpen(false)}></div>
+              <div className="absolute left-0 top-0 bottom-0 w-72 bg-white shadow-lg">
+                <div className="header-gradient text-white p-4 flex items-center justify-between">
+                  <span className="font-semibold">Menu</span>
+                  <button onClick={() => setMobileNavOpen(false)}><XMarkIcon className="w-6 h-6" /></button>
+                </div>
+                <nav className="p-2 space-y-1">
+                  <button className={`w-full text-left px-4 py-3 ${activeMenuItem === 'dashboard' ? 'bg-primary-50 text-primary-700' : 'hover:bg-gray-50'}`} onClick={() => { setActiveMenuItem('dashboard'); setMobileNavOpen(false) }}>
+                    Dashboard
+                  </button>
+                  <button className={`w-full text-left px-4 py-3 ${activeMenuItem === 'voluntarios' ? 'bg-primary-50 text-primary-700' : 'hover:bg-gray-50'}`} onClick={() => { setActiveMenuItem('voluntarios'); setMobileNavOpen(false) }}>
+                    Voluntários
+                  </button>
+                  <button className={`w-full text-left px-4 py-3 ${activeMenuItem === 'eventos' ? 'bg-primary-50 text-primary-700' : 'hover:bg-gray-50'}`} onClick={() => { setActiveMenuItem('eventos'); setMobileNavOpen(false) }}>
+                    Eventos
+                  </button>
+                  <button className={`w-full text-left px-4 py-3 ${activeMenuItem === 'checkins' ? 'bg-primary-50 text-primary-700' : 'hover:bg-gray-50'}`} onClick={() => { setActiveMenuItem('checkins'); setMobileNavOpen(false) }}>
+                    Check-ins
+                  </button>
+                  <button className={`w-full text-left px-4 py-3 ${activeMenuItem === 'conquistas' ? 'bg-primary-50 text-primary-700' : 'hover:bg-gray-50'}`} onClick={() => { setActiveMenuItem('conquistas'); setMobileNavOpen(false) }}>
+                    Conquistas
+                  </button>
+                  <button className={`w-full text-left px-4 py-3 ${activeMenuItem === 'equipes' ? 'bg-primary-50 text-primary-700' : 'hover:bg-gray-50'}`} onClick={() => { setActiveMenuItem('equipes'); setMobileNavOpen(false) }}>
+                    Equipes
+                  </button>
+                  <button className={`w-full text-left px-4 py-3 ${activeMenuItem === 'comunicacoes' ? 'bg-primary-50 text-primary-700' : 'hover:bg-gray-50'}`} onClick={() => { setActiveMenuItem('comunicacoes'); setMobileNavOpen(false) }}>
+                    Comunicações
+                  </button>
+                  <button className={`w-full text-left px-4 py-3 ${activeMenuItem === 'perfil' ? 'bg-primary-50 text-primary-700' : 'hover:bg-gray-50'}`} onClick={() => { setActiveMenuItem('perfil'); setMobileNavOpen(false) }}>
+                    Perfil
+                  </button>
+                  <button className={`w-full text-left px-4 py-3 ${activeMenuItem === 'configuracoes' ? 'bg-primary-50 text-primary-700' : 'hover:bg-gray-50'}`} onClick={() => { setActiveMenuItem('configuracoes'); setMobileNavOpen(false) }}>
+                    Configurações
+                  </button>
+                </nav>
+              </div>
+            </div>
+          )}
           {activeMenuItem === 'dashboard' && (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
