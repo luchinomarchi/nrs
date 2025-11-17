@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ChartBarIcon, UsersIcon, CalendarDaysIcon, CheckBadgeIcon, TrophyIcon, UserGroupIcon, EnvelopeIcon, Cog6ToothIcon } from '@heroicons/react/24/outline';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
+import { getSession, signOut } from 'next-auth/react'
 
 type Stats = { voluntariosAtivos: number; proximosEventos: number; checkinsRealizados: number; equipesAtivas: number };
 type Vol = { id: string; nome: string; email: string; equipe: string; participacoes: number; pontos: number; status: string };
@@ -34,6 +35,39 @@ export default function AdminDashboard() {
   const [checkRules, setCheckRules] = useState({ toleranceMinutes: 10, pointsPerPresence: 10 });
   const [pointsRules, setPointsRules] = useState({ presence: 10, participation: 20 });
   const [envInfo, setEnvInfo] = useState<any>(null);
+  const [branding, setBranding] = useState<any>({ accent: '', faviconUrl: '' })
+  const [navVisibility, setNavVisibility] = useState<any>({ dashboard: true, voluntarios: true, eventos: true, checkins: true, conquistas: true, equipes: true, comunicacoes: true, perfil: true, configuracoes: true })
+  const [eventsDefaults, setEventsDefaults] = useState<any>({ duration: 90, requireApproval: false })
+  const [checkAdvanced, setCheckAdvanced] = useState<any>({ toleranceMinutes: 10, qrCodeRequired: false, geofenceRadiusM: 0 })
+  const [commTemplates, setCommTemplates] = useState<any>({ eventReminder: { subject: '', body: '' } })
+  const [notifyDefaults, setNotifyDefaults] = useState<any>({ email: true, push: false, digest: 'daily' })
+  const [pointsLevelsText, setPointsLevelsText] = useState<string>('')
+  const [exportText, setExportText] = useState<string>('')
+  const [userName, setUserName] = useState<string>('Admin')
+  const [userImage, setUserImage] = useState<string | null>(null)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const [selectedAvatar, setSelectedAvatar] = useState<string>('')
+  const [userEmail, setUserEmail] = useState<string>('')
+  const [userPhone, setUserPhone] = useState<string>('')
+  const [userBio, setUserBio] = useState<string>('')
+  const [userLocale, setUserLocale] = useState<string>('pt-BR')
+  const [userTimezone, setUserTimezone] = useState<string>('')
+  const [userTheme, setUserTheme] = useState<string>('light')
+  const [notifyEmail, setNotifyEmail] = useState<boolean>(true)
+  const [notifyPush, setNotifyPush] = useState<boolean>(false)
+  const [marketingOptIn, setMarketingOptIn] = useState<boolean>(false)
+  const [pwdCurrent, setPwdCurrent] = useState<string>('')
+  const [pwdNew, setPwdNew] = useState<string>('')
+  const [pwdConfirm, setPwdConfirm] = useState<string>('')
+
+  function initialsFrom(n: string) {
+    const s = (n || '').trim()
+    if (!s) return 'A'
+    const parts = s.split(' ')
+    const first = parts[0]?.[0] || ''
+    const last = parts.length > 1 ? parts[parts.length - 1][0] || '' : ''
+    return (first + last).toUpperCase()
+  }
 
   useEffect(() => {
     let mounted = true;
@@ -58,6 +92,10 @@ export default function AdminDashboard() {
         setStats(sJson.stats as Stats);
         setVoluntarios(vJson.voluntarios as Vol[]);
         setTeams(tJson.distribuicao as TeamDist[]);
+        const sess = await getSession()
+        const n = (sess?.user?.name as string) || (sess?.user?.email as string) || 'Admin'
+        setUserName(n)
+        setUserImage((sess?.user?.image as string) || null)
         setLoading(false);
       } catch {
         if (!mounted) return;
@@ -68,6 +106,7 @@ export default function AdminDashboard() {
     load();
     return () => { mounted = false };
   }, []);
+
 
   useEffect(() => {
     async function loadSection() {
@@ -114,17 +153,43 @@ export default function AdminDashboard() {
           const j = await res.json();
           setEquipes(j.equipes || []);
         }
+      } else if (activeMenuItem === 'perfil') {
+        const r = await fetch('/api/user/profile');
+        if (r.ok) {
+          const j = await r.json();
+          const u = j.user || {};
+          setUserName(u.name || userName);
+          setUserImage(u.image || userImage);
+          setUserEmail(u.email || '');
+          setSelectedAvatar(u.image || '');
+          setUserPhone(u.phone || '');
+          setUserBio(u.bio || '');
+          setUserLocale(u.locale || userLocale);
+          setUserTimezone(u.timezone || '');
+          setUserTheme(u.theme || userTheme);
+          setNotifyEmail(!!u.notifyEmail);
+          setNotifyPush(!!u.notifyPush);
+          setMarketingOptIn(!!u.marketingOptIn);
+        }
       } else if (activeMenuItem === 'configuracoes') {
-        const [oRes, cRes, pRes, eRes] = await Promise.all([
+        const [oRes, cRes, pRes, bRes, nRes, eDefRes, cAdvRes, ctRes] = await Promise.all([
           fetch('/api/admin/settings/org.profile'),
           fetch('/api/admin/settings/checkin.rules'),
           fetch('/api/admin/settings/points.rules'),
-          fetch('/api/admin/system/env'),
+          fetch('/api/admin/settings/ui.branding'),
+          fetch('/api/admin/settings/nav.visibility'),
+          fetch('/api/admin/settings/events.defaults'),
+          fetch('/api/admin/settings/checkin.advanced'),
+          fetch('/api/admin/settings/comm.templates'),
         ]);
         if (oRes.ok) { const j = await oRes.json(); if (j.value) setOrg(j.value); }
         if (cRes.ok) { const j = await cRes.json(); if (j.value) setCheckRules(j.value); }
         if (pRes.ok) { const j = await pRes.json(); if (j.value) setPointsRules(j.value); }
-        if (eRes.ok) { const j = await eRes.json(); setEnvInfo(j.env); }
+        if (bRes.ok) { const j = await bRes.json(); if (j.value) setBranding(j.value); }
+        if (nRes.ok) { const j = await nRes.json(); if (j.value) setNavVisibility(j.value); }
+        if (eDefRes.ok) { const j = await eDefRes.json(); if (j.value) setEventsDefaults(j.value); }
+        if (cAdvRes.ok) { const j = await cAdvRes.json(); if (j.value) setCheckAdvanced(j.value); }
+        if (ctRes.ok) { const j = await ctRes.json(); if (j.value) setCommTemplates(j.value); }
       }
     }
     loadSection();
@@ -147,7 +212,7 @@ export default function AdminDashboard() {
             </div>
           </div>
           
-          <nav className="mt-4">
+        <nav className="mt-4">
             <a 
               href="#" 
               className={`flex items-center px-4 py-3 ${activeMenuItem === 'dashboard' ? 'bg-primary-600' : 'hover:bg-primary-500/20'}`}
@@ -206,13 +271,21 @@ export default function AdminDashboard() {
             </a>
             <a 
               href="#" 
+              className={`flex items-center px-4 py-3 ${activeMenuItem === 'perfil' ? 'bg-primary-600' : 'hover:bg-primary-500/20'}`}
+              onClick={() => setActiveMenuItem('perfil')}
+            >
+              <UserGroupIcon className="w-5 h-5 mr-3" />
+              <span>Perfil</span>
+            </a>
+            <a 
+              href="#" 
               className={`flex items-center px-4 py-3 ${activeMenuItem === 'configuracoes' ? 'bg-primary-600' : 'hover:bg-primary-500/20'}`}
               onClick={() => setActiveMenuItem('configuracoes')}
             >
               <Cog6ToothIcon className="w-5 h-5 mr-3" />
               <span>Configurações</span>
             </a>
-          </nav>
+        </nav>
         </div>
         
         {/* Main Content */}
@@ -229,9 +302,30 @@ export default function AdminDashboard() {
                 />
               </div>
               
-              <div className="flex items-center">
-                <div className="w-10 h-10 rounded-full bg-gray-300 mr-2"></div>
-                <span>Admin</span>
+              <div className="relative">
+                <button onClick={() => setUserMenuOpen(v => !v)} className="flex items-center focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-lg px-2 py-1">
+                  {userImage ? (
+                    <Image src={userImage} alt={userName} width={40} height={40} className="w-10 h-10 rounded-full mr-2 object-cover" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-gray-300 mr-2 flex items-center justify-center text-sm font-semibold text-gray-700">
+                      {initialsFrom(userName)}
+                    </div>
+                  )}
+                  <span className="text-sm font-medium">{userName}</span>
+                </button>
+                {userMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-md z-10">
+                    <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-50" onClick={() => { setActiveMenuItem('perfil'); setUserMenuOpen(false) }}>
+                      Perfil
+                    </button>
+                    <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-50" onClick={() => { setActiveMenuItem('configuracoes'); setUserMenuOpen(false) }}>
+                      Configurações
+                    </button>
+                    <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-50" onClick={() => { signOut({ callbackUrl: '/' }) }}>
+                      Sair
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -290,8 +384,8 @@ export default function AdminDashboard() {
                       <option>Este ano</option>
                     </select>
                   </div>
-                  <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
+                  <div className="h-64" style={{ minWidth: 0 }}>
+                    <ResponsiveContainer width="100%" aspect={2}>
                       <LineChart data={engajamento} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="date" tick={{ fontSize: 12 }} />
@@ -311,8 +405,8 @@ export default function AdminDashboard() {
                       <option>Inativos</option>
                     </select>
                   </div>
-                  <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
+                  <div className="h-64" style={{ minWidth: 0 }}>
+                    <ResponsiveContainer width="100%" aspect={1.8}>
                       <PieChart>
                         <Pie data={teams} dataKey="count" nameKey="equipe" cx="50%" cy="50%" outerRadius={80} label>
                           {teams.map((_, i) => (
@@ -655,6 +749,103 @@ export default function AdminDashboard() {
           </div>
         )}
 
+        {activeMenuItem === 'perfil' && (
+          <div className="mt-8 space-y-6">
+            <div className="card-primary rounded-lg shadow p-6">
+              <h3 className="font-semibold mb-4">Perfil</h3>
+              <div className="flex items-center mb-4">
+                {selectedAvatar ? (
+                  <Image src={selectedAvatar} alt={userName} width={64} height={64} className="w-16 h-16 rounded-full mr-3 object-cover" />
+                ) : (
+                  <div className="w-16 h-16 rounded-full bg-gray-300 mr-3 flex items-center justify-center text-base font-semibold text-gray-700">
+                    {userName.split(' ').map(p=>p[0]).slice(0,2).join('').toUpperCase()}
+                  </div>
+                )}
+                <div className="text-gray-700">
+                  <div className="font-medium">{userName}</div>
+                  <div className="text-sm">{userEmail}</div>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 mb-4">
+                {[
+                  `https://api.dicebear.com/7.x/avataaars/png?seed=${encodeURIComponent(userName || 'nrs')}&backgroundColor=93c5fd`,
+                  'https://api.dicebear.com/7.x/avataaars/png?seed=solidaria1&backgroundColor=86efac',
+                  'https://api.dicebear.com/7.x/avataaars/png?seed=solidaria2&backgroundColor=fde68a',
+                  'https://api.dicebear.com/7.x/micah/png?seed=solidaria3&backgroundColor=bfdbfe',
+                  'https://api.dicebear.com/7.x/micah/png?seed=solidaria4&backgroundColor=fbcfe8',
+                  'https://api.dicebear.com/7.x/bottts/png?seed=solidaria5&backgroundColor=bbf7d0',
+                  'https://api.dicebear.com/7.x/bottts/png?seed=solidaria6&backgroundColor=fee2e2',
+                  'https://api.dicebear.com/7.x/croodles-neutral/png?seed=solidaria7&backgroundColor=f5f5f5',
+                  'https://api.dicebear.com/7.x/croodles-neutral/png?seed=solidaria8&backgroundColor=ede9fe',
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(userName || 'NRS')}&background=random&size=160`,
+                  '/avatars/brand-blue.svg',
+                  '/avatars/brand-green.svg',
+                  '/avatars/brand-orange.svg',
+                  '/avatars/brand-purple.svg',
+                ].map((src) => (
+                  <button key={src} className={`rounded-lg overflow-hidden border ${selectedAvatar === src ? 'border-primary-500 ring-2 ring-primary-300' : 'border-gray-200'}`} onClick={() => setSelectedAvatar(src)}>
+                    <Image src={src} alt="avatar" width={120} height={120} className="w-full h-24 object-cover" />
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-3 mb-6">
+                <input className="border rounded px-3 py-2 flex-1" placeholder="URL da imagem (https://...)" value={selectedAvatar} onChange={(e) => setSelectedAvatar(e.target.value)} />
+                <button className="btn-primary" onClick={async () => {
+                  const img = selectedAvatar.trim()
+                  const r = await fetch('/api/user/profile', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: img || null }) })
+                  if (r.ok) {
+                    setUserImage(img || null)
+                  }
+                }}>Salvar avatar</button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <input className="border rounded px-3 py-2" placeholder="Nome" value={userName} onChange={(e) => setUserName(e.target.value)} />
+                <input className="border rounded px-3 py-2" placeholder="Telefone" value={userPhone} onChange={(e) => setUserPhone(e.target.value)} />
+                <textarea className="border rounded px-3 py-2 md:col-span-2" placeholder="Bio" value={userBio} onChange={(e) => setUserBio(e.target.value)} />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <select className="border rounded px-3 py-2" value={userLocale} onChange={(e) => setUserLocale(e.target.value)}>
+                  <option value="pt-BR">Português (Brasil)</option>
+                  <option value="en-US">English (US)</option>
+                </select>
+                <input className="border rounded px-3 py-2" placeholder="Timezone (ex.: America/Sao_Paulo)" value={userTimezone} onChange={(e) => setUserTimezone(e.target.value)} />
+                <select className="border rounded px-3 py-2" value={userTheme} onChange={(e) => setUserTheme(e.target.value)}>
+                  <option value="light">Tema claro</option>
+                  <option value="dark">Tema escuro</option>
+                  <option value="system">Sistema</option>
+                </select>
+              </div>
+              <div className="flex items-center gap-6 mb-4">
+                <label className="flex items-center gap-2"><input type="checkbox" checked={notifyEmail} onChange={(e) => setNotifyEmail(e.target.checked)} /> E-mails</label>
+                <label className="flex items-center gap-2"><input type="checkbox" checked={notifyPush} onChange={(e) => setNotifyPush(e.target.checked)} /> Notificações push</label>
+                <label className="flex items-center gap-2"><input type="checkbox" checked={marketingOptIn} onChange={(e) => setMarketingOptIn(e.target.checked)} /> Receber novidades</label>
+              </div>
+              <div className="flex gap-3">
+                <button className="btn-primary" onClick={async () => {
+                  const body = { name: userName }
+                  const r = await fetch('/api/user/profile', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+                  if (r.ok) {
+                  }
+                }}>Salvar perfil</button>
+                <button className="px-4 py-2 border rounded" onClick={() => {}}>Cancelar</button>
+              </div>
+            </div>
+            <div className="card-primary rounded-lg shadow p-6">
+              <h3 className="font-semibold mb-4">Segurança</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <input className="border rounded px-3 py-2" type="password" placeholder="Senha atual" value={pwdCurrent} onChange={(e) => setPwdCurrent(e.target.value)} />
+                <input className="border rounded px-3 py-2" type="password" placeholder="Nova senha" value={pwdNew} onChange={(e) => setPwdNew(e.target.value)} />
+                <input className="border rounded px-3 py-2" type="password" placeholder="Confirmar senha" value={pwdConfirm} onChange={(e) => setPwdConfirm(e.target.value)} />
+              </div>
+              <div className="mt-4"><button className="btn-primary" onClick={async () => {
+                if (pwdNew !== pwdConfirm || pwdNew.length < 8) return
+                const r = await fetch('/api/user/password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ currentPassword: pwdCurrent, newPassword: pwdNew }) })
+                if (r.ok) { setPwdCurrent(''); setPwdNew(''); setPwdConfirm('') }
+              }}>Alterar senha</button></div>
+            </div>
+          </div>
+        )}
+
         {activeMenuItem === 'configuracoes' && (
           <div className="mt-8 space-y-6">
             <div className="card-primary rounded-lg shadow p-6">
@@ -694,17 +885,113 @@ export default function AdminDashboard() {
             </div>
 
             <div className="card-primary rounded-lg shadow p-6">
-              <h3 className="font-semibold mb-4">Sistema (somente leitura)</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
-                <div><span className="font-medium">NEXTAUTH_URL:</span> {envInfo?.NEXTAUTH_URL ?? '-'}</div>
-                <div><span className="font-medium">NEXTAUTH_SECRET:</span> {envInfo?.NEXTAUTH_SECRET ?? '-'}</div>
-                <div><span className="font-medium">DATABASE_URL:</span> {envInfo?.DATABASE_URL ?? '-'}</div>
-                <div><span className="font-medium">EMAIL_HOST:</span> {envInfo?.EMAIL_HOST ?? '-'}</div>
-                <div><span className="font-medium">EMAIL_PORT:</span> {envInfo?.EMAIL_PORT ?? '-'}</div>
-                <div><span className="font-medium">EMAIL_USER:</span> {envInfo?.EMAIL_USER ?? '-'}</div>
-                <div><span className="font-medium">EMAIL_PASS:</span> {envInfo?.EMAIL_PASS ?? '-'}</div>
-                <div><span className="font-medium">ADMIN_BOOTSTRAP_SECRET:</span> {envInfo?.ADMIN_BOOTSTRAP_SECRET ?? '-'}</div>
+              <h3 className="font-semibold mb-4">Branding</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input className="border rounded px-3 py-2" placeholder="Cor de destaque (hex)" value={branding.accent || ''} onChange={(e) => setBranding({ ...branding, accent: e.target.value })} />
+                <input className="border rounded px-3 py-2" placeholder="URL do favicon" value={branding.faviconUrl || ''} onChange={(e) => setBranding({ ...branding, faviconUrl: e.target.value })} />
               </div>
+              <div className="mt-4"><button className="btn-primary" onClick={async () => {
+                await fetch('/api/admin/settings/ui.branding', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ value: branding }) });
+              }}>Salvar</button></div>
+            </div>
+
+            <div className="card-primary rounded-lg shadow p-6">
+              <h3 className="font-semibold mb-4">Navegação</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {Object.entries(navVisibility).map(([k, v]) => (
+                  <label key={k} className="flex items-center gap-2"><input type="checkbox" checked={!!v} onChange={(e) => setNavVisibility({ ...navVisibility, [k]: e.target.checked })} /> {k}</label>
+                ))}
+              </div>
+              <div className="mt-4"><button className="btn-primary" onClick={async () => {
+                await fetch('/api/admin/settings/nav.visibility', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ value: navVisibility }) });
+              }}>Salvar</button></div>
+            </div>
+
+            <div className="card-primary rounded-lg shadow p-6">
+              <h3 className="font-semibold mb-4">Eventos (padrões)</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input className="border rounded px-3 py-2" type="number" placeholder="Duração padrão (min)" value={eventsDefaults.duration || 0} onChange={(e) => setEventsDefaults({ ...eventsDefaults, duration: Number(e.target.value) })} />
+                <label className="flex items-center gap-2"><input type="checkbox" checked={!!eventsDefaults.requireApproval} onChange={(e) => setEventsDefaults({ ...eventsDefaults, requireApproval: e.target.checked })} /> Aprovação para participação</label>
+              </div>
+              <div className="mt-4"><button className="btn-primary" onClick={async () => {
+                await fetch('/api/admin/settings/events.defaults', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ value: eventsDefaults }) });
+              }}>Salvar</button></div>
+            </div>
+
+            <div className="card-primary rounded-lg shadow p-6">
+              <h3 className="font-semibold mb-4">Check-ins (avançado)</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <input className="border rounded px-3 py-2" type="number" placeholder="Tolerância (min)" value={checkAdvanced.toleranceMinutes || 0} onChange={(e) => setCheckAdvanced({ ...checkAdvanced, toleranceMinutes: Number(e.target.value) })} />
+                <label className="flex items-center gap-2"><input type="checkbox" checked={!!checkAdvanced.qrCodeRequired} onChange={(e) => setCheckAdvanced({ ...checkAdvanced, qrCodeRequired: e.target.checked })} /> QR Code obrigatório</label>
+                <input className="border rounded px-3 py-2" type="number" placeholder="Geofence (m)" value={checkAdvanced.geofenceRadiusM || 0} onChange={(e) => setCheckAdvanced({ ...checkAdvanced, geofenceRadiusM: Number(e.target.value) })} />
+              </div>
+              <div className="mt-4"><button className="btn-primary" onClick={async () => {
+                await fetch('/api/admin/settings/checkin.advanced', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ value: checkAdvanced }) });
+              }}>Salvar</button></div>
+            </div>
+
+            <div className="card-primary rounded-lg shadow p-6">
+              <h3 className="font-semibold mb-4">Comunicações (templates)</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input className="border rounded px-3 py-2" placeholder="Assunto lembrete de evento" value={commTemplates.eventReminder?.subject || ''} onChange={(e) => setCommTemplates({ ...commTemplates, eventReminder: { ...(commTemplates.eventReminder||{}), subject: e.target.value } })} />
+                <textarea className="border rounded px-3 py-2" placeholder="Corpo lembrete de evento" value={commTemplates.eventReminder?.body || ''} onChange={(e) => setCommTemplates({ ...commTemplates, eventReminder: { ...(commTemplates.eventReminder||{}), body: e.target.value } })} />
+              </div>
+              <div className="mt-4"><button className="btn-primary" onClick={async () => {
+                await fetch('/api/admin/settings/comm.templates', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ value: commTemplates }) });
+              }}>Salvar</button></div>
+            </div>
+
+            <div className="card-primary rounded-lg shadow p-6">
+              <h3 className="font-semibold mb-4">Notificações (padrões)</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <label className="flex items-center gap-2"><input type="checkbox" checked={!!notifyDefaults.email} onChange={(e) => setNotifyDefaults({ ...notifyDefaults, email: e.target.checked })} /> E-mail</label>
+                <label className="flex items-center gap-2"><input type="checkbox" checked={!!notifyDefaults.push} onChange={(e) => setNotifyDefaults({ ...notifyDefaults, push: e.target.checked })} /> Push</label>
+                <select className="border rounded px-3 py-2" value={notifyDefaults.digest || 'daily'} onChange={(e) => setNotifyDefaults({ ...notifyDefaults, digest: e.target.value })}>
+                  <option value="off">Sem resumo</option>
+                  <option value="daily">Diário</option>
+                  <option value="weekly">Semanal</option>
+                </select>
+              </div>
+              <div className="mt-4"><button className="btn-primary" onClick={async () => {
+                await fetch('/api/admin/settings/notify.defaults', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ value: notifyDefaults }) });
+              }}>Salvar</button></div>
+            </div>
+
+            <div className="card-primary rounded-lg shadow p-6">
+              <h3 className="font-semibold mb-4">Pontuação & Níveis</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input className="border rounded px-3 py-2" type="number" placeholder="Presença" value={pointsRules.presence} onChange={(e) => setPointsRules({ ...pointsRules, presence: Number(e.target.value) })} />
+                <input className="border rounded px-3 py-2" type="number" placeholder="Participação" value={pointsRules.participation} onChange={(e) => setPointsRules({ ...pointsRules, participation: Number(e.target.value) })} />
+              </div>
+              <div className="mt-4"><textarea className="border rounded px-3 py-2 w-full" rows={4} placeholder='Níveis (JSON) ex.: [{"nome":"Bronze","min":0},{"nome":"Prata","min":100}]' value={pointsLevelsText} onChange={(e) => setPointsLevelsText(e.target.value)} /></div>
+              <div className="mt-4 flex gap-3">
+                <button className="btn-primary" onClick={async () => {
+                  let levels: any[] = []
+                  try { levels = JSON.parse(pointsLevelsText || '[]') } catch {}
+                  await fetch('/api/admin/settings/points.levels', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ value: levels }) });
+                  await fetch('/api/admin/settings/points.rules', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ value: pointsRules }) });
+                }}>Salvar</button>
+                <button className="px-4 py-2 border rounded" onClick={() => setPointsLevelsText('')}>Limpar níveis</button>
+              </div>
+            </div>
+
+            <div className="card-primary rounded-lg shadow p-6">
+              <h3 className="font-semibold mb-4">Exportar / Importar</h3>
+              <div className="flex gap-3 mb-4">
+                <button className="px-4 py-2 border rounded" onClick={async () => {
+                  const r = await fetch('/api/admin/settings/all')
+                  if (r.ok) { const j = await r.json(); setExportText(JSON.stringify(j.settings, null, 2)) }
+                }}>Exportar</button>
+                <button className="btn-primary" onClick={async () => {
+                  try {
+                    const arr = JSON.parse(exportText || '[]')
+                    for (const s of arr) {
+                      await fetch(`/api/admin/settings/${encodeURIComponent(s.key)}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ value: s.value }) })
+                    }
+                  } catch {}
+                }}>Importar</button>
+              </div>
+              <textarea className="border rounded px-3 py-2 w-full" rows={8} placeholder="Cole JSON de configurações aqui" value={exportText} onChange={(e) => setExportText(e.target.value)} />
             </div>
           </div>
         )}

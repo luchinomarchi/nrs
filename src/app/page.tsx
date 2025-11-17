@@ -4,41 +4,47 @@ import Image from 'next/image';
 export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-primary-50 to-white">
-      <div className="container mx-auto px-4 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Header */}
-        <header className="flex justify-between items-center mb-16">
+        <header className="flex justify-between items-center mb-6 sm:mb-12">
           <div className="flex items-center">
             <Image 
               src="/logo-nrs.png" 
               alt="Nossa Ronda Solidária" 
               width={200} 
               height={50}
-              className="h-12 w-auto"
+              className="h-10 sm:h-12 w-auto"
             />
           </div>
-          <div className="flex space-x-4">
+          <div className="hidden md:flex space-x-3">
             <Link href="/login" className="px-4 py-2 rounded-md bg-white text-primary-700 border border-primary-700 hover:bg-primary-50 transition">
               Entrar
             </Link>
             <Link href="/register" className="btn-primary">
               Cadastrar
             </Link>
-            <Link href="/forgot" className="px-4 py-2 rounded-md text-primary-700 hover:text-primary-800">
-              Esqueceu a senha?
-            </Link>
           </div>
         </header>
 
+        <div className="md:hidden flex items-center justify-between mb-8">
+          <Link href="/login" className="flex-1 mr-3 px-4 py-2 rounded-md bg-white text-primary-700 border border-primary-700 text-center">
+            Entrar
+          </Link>
+          <Link href="/register" className="flex-1 ml-3 btn-primary text-center">
+            Cadastrar
+          </Link>
+        </div>
+
         {/* Hero Section */}
-        <section className="flex flex-col md:flex-row items-center mb-20">
-          <div className="md:w-1/2 mb-10 md:mb-0">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">
+        <section className="flex flex-col md:flex-row items-center mb-14 sm:mb-20">
+          <div className="md:w-1/2 mb-8 md:mb-0">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800 mb-4 sm:mb-6">
               Transforme vidas através do voluntariado
             </h2>
-            <p className="text-lg text-gray-600 mb-8">
+            <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8">
               Junte-se à Nossa Ronda Solidária e faça parte de uma comunidade dedicada a ajudar pessoas em situação de vulnerabilidade.
             </p>
-            <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+            <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
               <Link href="/register" className="btn-primary text-center px-6 py-3">
                 Seja um voluntário
               </Link>
@@ -48,7 +54,7 @@ export default function Home() {
             </div>
           </div>
           <div className="md:w-1/2 flex justify-center">
-            <div className="w-full max-w-md h-80 bg-gradient-to-br from-primary-200 to-secondary-200 rounded-lg relative overflow-hidden">
+            <div className="w-full max-w-sm sm:max-w-md h-48 sm:h-80 bg-gradient-to-br from-primary-200 to-secondary-200 rounded-lg relative overflow-hidden">
               {/* Placeholder for hero image */}
               <div className="absolute inset-0 flex items-center justify-center text-primary-700 text-lg font-medium">
                 Imagem Ilustrativa
@@ -58,8 +64,8 @@ export default function Home() {
         </section>
 
         {/* Features Section */}
-        <section className="mb-20">
-          <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">Como funciona</h2>
+        <section className="mb-14 sm:mb-20">
+          <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-800 mb-8 sm:mb-12">Como funciona</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="card-primary p-6">
               <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center text-primary-700 mb-4 font-bold">
@@ -92,26 +98,26 @@ export default function Home() {
         </section>
 
         {/* Stats Section */}
-        <section className="header-gradient text-white py-12 px-6 rounded-lg mb-20">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+        <section className="header-gradient text-white py-8 sm:py-12 px-4 sm:px-6 rounded-lg mb-14 sm:mb-20">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 text-center">
             <div>
-              <div className="text-4xl font-bold mb-2">1.200+</div>
+              <div className="text-3xl sm:text-4xl font-bold mb-2">1.200+</div>
               <div className="text-primary-200">Voluntários ativos</div>
             </div>
             <div>
-              <div className="text-4xl font-bold mb-2">350+</div>
+              <div className="text-3xl sm:text-4xl font-bold mb-2">350+</div>
               <div className="text-primary-200">Ações realizadas</div>
             </div>
             <div>
-              <div className="text-4xl font-bold mb-2">15.000+</div>
+              <div className="text-3xl sm:text-4xl font-bold mb-2">15.000+</div>
               <div className="text-primary-200">Pessoas impactadas</div>
             </div>
           </div>
         </section>
 
         {/* Testimonials */}
-        <section className="mb-20">
-          <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">Depoimentos</h2>
+        <section className="mb-14 sm:mb-20">
+          <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-800 mb-8 sm:mb-12">Depoimentos</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="card-primary p-6">
               <p className="text-gray-600 mb-4">
@@ -141,19 +147,19 @@ export default function Home() {
         </section>
 
         {/* CTA Section */}
-        <section className="text-center mb-20">
-          <h2 className="text-3xl font-bold text-gray-800 mb-6">Pronto para começar?</h2>
-          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+        <section className="text-center mb-14 sm:mb-20">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 sm:mb-6">Pronto para começar?</h2>
+          <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8 max-w-2xl mx-auto">
             Junte-se a centenas de voluntários que estão fazendo a diferença na vida de pessoas em situação de vulnerabilidade.
           </p>
-          <Link href="/register" className="btn-primary px-8 py-4 text-lg inline-block">
+          <Link href="/register" className="btn-primary px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg inline-block">
             Cadastre-se agora
           </Link>
         </section>
 
         {/* Footer */}
-        <footer className="border-t border-gray-200 pt-10">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
+        <footer className="border-t border-gray-200 pt-8 sm:pt-10">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-10">
             <div>
               <div className="flex items-center mb-4">
                 <Image 
@@ -201,7 +207,7 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <div className="text-center text-gray-500 py-6 border-t border-gray-200">
+          <div className="text-center text-gray-500 py-4 sm:py-6 border-t border-gray-200">
             &copy; {new Date().getFullYear()} Nossa Ronda Solidária. Todos os direitos reservados.
           </div>
         </footer>

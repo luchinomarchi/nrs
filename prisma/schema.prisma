@@ -20,6 +20,14 @@ model User {
   password      String?
   role          String    @default("voluntario") // admin, voluntario
   approved      Boolean   @default(false)
+  phone         String?
+  bio           String?
+  locale        String?
+  timezone      String?
+  theme         String?
+  notifyEmail   Boolean   @default(true)
+  notifyPush    Boolean   @default(false)
+  marketingOptIn Boolean  @default(false)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
