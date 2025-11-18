@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 export default function Home() {
+  const hero = process.env.NEXT_PUBLIC_HERO_IMAGE_URL
   return (
     <main className="min-h-screen bg-gradient-to-b from-primary-50 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
@@ -57,12 +58,10 @@ export default function Home() {
             </div>
           </div>
           <div className="md:w-1/2 flex justify-center">
-            <div className="w-full max-w-sm sm:max-w-md h-48 sm:h-80 bg-gradient-to-br from-primary-200 to-secondary-200 rounded-lg relative overflow-hidden">
-              {/* Placeholder for hero image */}
-              <div className="absolute inset-0 flex items-center justify-center text-primary-700 text-lg font-medium">
-                Imagem Ilustrativa
-              </div>
-            </div>
+            <div
+              className="w-full max-w-sm sm:max-w-md h-48 sm:h-80 rounded-lg relative overflow-hidden bg-gradient-to-br from-primary-200 to-secondary-200 bg-center bg-cover"
+              style={hero ? { backgroundImage: `url(${hero})` } : undefined}
+            />
           </div>
         </section>
 
