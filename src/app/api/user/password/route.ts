@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
+import type { Session } from "next-auth"
 import { authOptions } from "../../../../lib/authOptions"
 import { prisma } from "../../../../lib/prisma"
 import { hashPassword, verifyPassword } from "../../../../lib/auth"
 
 export async function POST(request: Request) {
-  const session = await getServerSession(authOptions as any)
+  const session = (await getServerSession(authOptions as any)) as Session | null
   const email = session?.user?.email as string | undefined
   if (!session || !email) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
   const { currentPassword, newPassword } = await request.json()
@@ -23,4 +24,3 @@ export async function POST(request: Request) {
   await prisma.user.update({ where: { email }, data: { password: hashed } })
   return NextResponse.json({ ok: true })
 }
-

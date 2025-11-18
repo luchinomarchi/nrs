@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
+import type { Session } from "next-auth"
 import { authOptions } from "../../../../lib/authOptions"
 import { prisma } from "../../../../lib/prisma"
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions as any)
+    const session = (await getServerSession(authOptions as any)) as Session | null
     const email = session?.user?.email as string | undefined
     if (!session || !email) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
     const user = await prisma.user.findUnique({ where: { email }, select: { name: true, email: true, image: true, phone: true, bio: true, locale: true, timezone: true, theme: true, notifyEmail: true, notifyPush: true, marketingOptIn: true } })
@@ -17,7 +18,7 @@ export async function GET() {
 
 export async function PUT(request: Request) {
   try {
-    const session = await getServerSession(authOptions as any)
+    const session = (await getServerSession(authOptions as any)) as Session | null
     const email = session?.user?.email as string | undefined
     if (!session || !email) return NextResponse.json({ error: 'Acesso negado' }, { status: 403 })
     const body = await request.json()
