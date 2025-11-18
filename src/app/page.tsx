@@ -26,13 +26,16 @@ export default function Home() {
           </div>
         </header>
 
-        <div className="md:hidden flex items-center justify-between mb-8">
-          <Link href="/login" className="flex-1 mr-3 px-4 py-2 rounded-md bg-white text-primary-700 border border-primary-700 text-center">
+        <div className="md:hidden flex items-center justify-between mb-4">
+          <Link href="/login" className="flex-1 mr-2 px-4 py-2 rounded-md bg-white text-primary-700 border border-primary-700 text-center">
             Entrar
           </Link>
-          <Link href="/register" className="flex-1 ml-3 btn-primary text-center">
+          <Link href="/register" className="flex-1 ml-2 btn-primary text-center">
             Cadastrar
           </Link>
+        </div>
+        <div className="md:hidden text-right mb-8">
+          <Link href="/forgot" className="text-sm text-primary-700 hover:text-primary-800">Esqueceu a senha?</Link>
         </div>
 
         {/* Hero Section */}
